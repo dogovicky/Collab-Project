@@ -1,6 +1,8 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import axios from 'axios'; // Import axios
+import { toast } from 'react-toastify'; // Import toast
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -14,99 +16,69 @@ const LoginForm = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.email.trim()) newErrors.email= 'Email is required';
-        if (!formData.password.trim()) newErrors.password= 'Password is required';
+        if (!formData.email.trim()) newErrors.email = 'Email is required';
+        if (!formData.password.trim()) newErrors.password = 'Password is required';
         return newErrors;
     };
 
     const handleChange = (e) => {
-        const {name, value} = e.target;
-        setFormData({...errors,[name]:''});
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value }); // Correctly update formData
 
         // clear errors
         if (errors[name]) {
-            setErrors({...errors, [name]:''});
+            setErrors({ ...errors, [name]: '' });
         }
     };
-    const handleSubmit = async(e) => {
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setErrors(validateForm());
-//validate the form
-const formErrors = validateForm();
+        const formErrors = validateForm();
 
-if (Object.keys(formErrors).length>0) {
-    setErrors(formErrors);
-    toast.error('please fill in all the required fileds');
-    return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-        // Send login request to the backend API
-        const response = await axios.post('https://api.example.com/login', {
-          emailOrUsername: formData.emailOrUsername,
-          password: formData.password
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-            // Include CSRF token if your backend requires it
-            // 'X-CSRF-Token': csrfToken,
-          }
-        });
-        
-        if (response.status === 200 && response.data.token) {
-          // Store JWT token securely
-          localStorage.setItem('authToken', response.data.token);
-          
-          // Show success notification
-          toast.success('Logged in successfully!');
-          
-          // Redirect to dashboard or home page after a short delay
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 1500);
+        if (Object.keys(formErrors).length > 0) {
+            setErrors(formErrors);
+            toast.error('Please fill in all the required fields');
+            return;
         }
-      } catch (error) {
-        console.error('Login error:', error);
-        
-        // Handle different types of errors
-        if (error.response) {
-          // The server responded with an error status
-          const { status, data } = error.response;
-          
-          if (status === 401) {
-            // Unauthorized - invalid credentials
-            toast.error('Invalid email/username or password');
-          } else if (status === 400) {
-            // Bad request - validation errors
-            toast.error(data.message || 'Invalid login data');
-            
-            // Update form errors if the backend provided field-specific errors
-            if (data.errors) {
-              setErrors(data.errors);
+
+        setIsSubmitting(true);
+
+        try {
+            // Send login request to the backend API
+            const response = await axios.post('https://api.example.com/login', {
+                email: formData.email, // Use email from formData
+                password: formData.password
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Include CSRF token if your backend requires it
+                    // 'X-CSRF-Token': csrfToken,
+                }
+            });
+
+            if (response.status === 200 && response.data.token) {
+                // Store JWT token securely
+                localStorage.setItem('authToken', response.data.token);
+
+                // Show success notification
+                toast.success('Logged in successfully!');
+
+                // Redirect to dashboard or home page after a short delay
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 1500);
             }
-          } else if (status === 403) {
-            // Forbidden - account locked or requires verification
-            toast.error(data.message || 'Account locked or requires verification');
-          } else {
-            // General server error
-            toast.error('Server error. Please try again later.');
-          }
-        } else if (error.request) {
-          // No response received
-          toast.error('No response from server. Please check your internet connection.');
-        } else {
-          // Something else went wrong
-          toast.error('An unexpected error occurred.');
+        } catch (error) {
+            console.error('Login error:', error);
+            toast.error('Login failed. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
-      } finally {
-        setIsSubmitting(false);
-      }
     };
-    
+
     const handleForgotPassword = () => {
-      navigate('/forgot-password');
+        navigate('/forgot-password');
     };
 
     return (
@@ -117,49 +89,50 @@ if (Object.keys(formErrors).length>0) {
                     <div className="form-group">
                         <label htmlFor="email">Email</label>
                         <input
-                         type="text"
-                         id="email"
-                         name="email"
-                         value={formData.email}
-                         onChange={handleChange} 
-                         className={errors.email ? 'error' : ''}
-                         disabled={isSubmitting}
-                         />
-                         {errors.email && <span className="error-message">{errors.email}</span>}
+                            type="text"
+                            id="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            className={errors.email ? 'error' : ''}
+                            disabled={isSubmitting}
+                        />
+                        {errors.email && <span className="error-message">{errors.email}</span>}
                     </div>
                     <div className="form-group">
-                        <label htmlFor="password"></label>
+                        <label htmlFor="password">Password</label> {/* Add label text */}
                         <input
-                         type="password"
-                         id="password"
-                         name="password"
-                         value={formData.password}
-                         onChange={handleChange}
-                         className={errors.password ? 'error' : ''}
-                         disabled={isSubmitting} 
-                         />
-                         {errors.password && <span className="error-message">{errors.password}</span>}
+                            type="password"
+                            id="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            className={errors.password ? 'error' : ''}
+                            disabled={isSubmitting}
+                        />
+                        {errors.password && <span className="error-message">{errors.password}</span>}
                     </div>
                     <div className="forgot-password">
                         <button
-                        type="button"
-                        className="forgot-password-link"
-                        onClick={handleForgotPassword}
-                        disabled={isSubmitting}
+                            type="button"
+                            className="forgot-password-link"
+                            onClick={handleForgotPassword}
+                            disabled={isSubmitting}
                         >
-                        Forgot Password</button>
+                            Forgot Password
+                        </button>
                     </div>
-                    <button type="submit" lassName="login-button" disabled={isSubmitting}>
-                    {isSubmitting ? 'Logging in...' : 'Log In'}
+                    <button type="submit" className="login-button" disabled={isSubmitting}>
+                        {isSubmitting ? 'Logging in...' : 'Log In'}
                     </button>
                     <div className="signup-link">
-            Don't have an account? <a href="/signup">Sign Up</a>
-          </div>
+                        Don't have an account? <Link to="/signup">Sign Up</Link> {/* Use Link component */}
+                    </div>
                 </form>
-                
             </div>
             {/* <ToastContainer position="top-right" autoClose={5000} /> */}
         </div>
     );
 };
+
 export default LoginForm;
