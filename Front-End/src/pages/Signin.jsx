@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import axios from 'axios'; // Import axios
-import { toast } from 'react-toastify'; // Import toast
+import { useNavigate, Link } from "react-router-dom";
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -23,9 +22,8 @@ const LoginForm = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value }); // Correctly update formData
+        setFormData({ ...formData, [name]: value });
 
-        // clear errors
         if (errors[name]) {
             setErrors({ ...errors, [name]: '' });
         }
@@ -33,7 +31,6 @@ const LoginForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrors(validateForm());
         const formErrors = validateForm();
 
         if (Object.keys(formErrors).length > 0) {
@@ -45,26 +42,18 @@ const LoginForm = () => {
         setIsSubmitting(true);
 
         try {
-            // Send login request to the backend API
             const response = await axios.post('https://api.example.com/login', {
-                email: formData.email, // Use email from formData
+                email: formData.email,
                 password: formData.password
             }, {
                 headers: {
                     'Content-Type': 'application/json',
-                    // Include CSRF token if your backend requires it
-                    // 'X-CSRF-Token': csrfToken,
                 }
             });
 
             if (response.status === 200 && response.data.token) {
-                // Store JWT token securely
                 localStorage.setItem('authToken', response.data.token);
-
-                // Show success notification
                 toast.success('Logged in successfully!');
-
-                // Redirect to dashboard or home page after a short delay
                 setTimeout(() => {
                     navigate('/dashboard');
                 }, 1500);
@@ -100,7 +89,7 @@ const LoginForm = () => {
                         {errors.email && <span className="error-message">{errors.email}</span>}
                     </div>
                     <div className="form-group">
-                        <label htmlFor="password">Password</label> {/* Add label text */}
+                        <label htmlFor="password">Password</label>
                         <input
                             type="password"
                             id="password"
@@ -126,11 +115,10 @@ const LoginForm = () => {
                         {isSubmitting ? 'Logging in...' : 'Log In'}
                     </button>
                     <div className="signup-link">
-                        Don't have an account? <Link to="/signup">Sign Up</Link> {/* Use Link component */}
+                        Don't have an account? <Link to="/signup">Sign Up</Link>
                     </div>
                 </form>
             </div>
-            {/* <ToastContainer position="top-right" autoClose={5000} /> */}
         </div>
     );
 };
