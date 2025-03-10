@@ -1,23 +1,22 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Signup from './pages/signup'
-import Signin from './pages/signin'
-import EmailValidationPage from './pages/EmailValidationPage'
-import ForgotPassword from './pages/ForgotPassword'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import EmailValidationPage from "./pages/EmailValidationPage";
+import ForgotPassword from "./pages/ForgotPassword";
+import SignUp from "./pages/SignUp";
+import SignIn from "./pages/SignIn";
 
 function App() {
-  return(
+  return (
     <Router>
-    <div className='App'>
-      <Routes>
-        <Route path='/signup' element={<Signup/>} />
-        <Route path='/signin' element={<Signin/>} />
-        <Route path='/email-validation' element={<EmailValidationPage/>} />
-        <Route path='/forgot-password' element={<ForgotPassword/>} />
-      </Routes>
-      
-    </div>
-  </Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<SignUp />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/email-validation" element={<EmailValidationPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
-export default App
+export default App;
