@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import "./CssSheets/SignIn.css";
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -77,7 +78,8 @@ const SignIn = () => {
   return (
     <div className="login-container">
       <div className="login-form-wrapper">
-        <h1>Log In</h1>
+        <h1>Nexus</h1> 
+        <h2>Log Into Nexus</h2> 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -89,6 +91,7 @@ const SignIn = () => {
               onChange={handleChange}
               className={errors.email ? "error" : ""}
               disabled={isSubmitting}
+              placeholder="Enter your email"
             />
             {errors.email && (
               <span className="error-message">{errors.email}</span>
@@ -104,20 +107,11 @@ const SignIn = () => {
               onChange={handleChange}
               className={errors.password ? "error" : ""}
               disabled={isSubmitting}
+              placeholder="Enter 8 digit password"
             />
             {errors.password && (
               <span className="error-message">{errors.password}</span>
             )}
-          </div>
-          <div className="forgot-password">
-            <button
-              type="button"
-              className="forgot-password-link"
-              onClick={handleForgotPassword}
-              disabled={isSubmitting}
-            >
-              Forgot Password
-            </button>
           </div>
           <button
             type="submit"
@@ -126,8 +120,13 @@ const SignIn = () => {
           >
             {isSubmitting ? "Logging in..." : "Log In"}
           </button>
+          <div className="forgot-password">
+            <Link to="/forgot-password" className="forgot-password-link">
+              Forgot Password?
+            </Link>
+          </div>
           <div className="signup-link">
-            Don't have an account? <Link to="/signup">Sign Up</Link>
+            Don't have an account? <Link to="/">Sign Up</Link>
           </div>
         </form>
       </div>

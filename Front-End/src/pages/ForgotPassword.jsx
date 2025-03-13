@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import './CssSheets/ForgotPassword.css';
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
@@ -16,7 +18,6 @@ const ForgotPassword = () => {
     setError('');
     setMessage('');
     try {
-      // Replace with your actual API call
       await sendResetCode({ email });
       setMessage('A reset code has been sent to your email.');
       setStep(2);
@@ -37,10 +38,13 @@ const ForgotPassword = () => {
     setError('');
     setMessage('');
     try {
-      // Replace with your actual API call
       await resetPassword({ code, newPassword });
       setMessage('Your password has been successfully reset.');
       setStep(1);
+      setEmail('');
+      setCode('');
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (err) {
       setError('Failed to reset password. Please try again.');
     } finally {
@@ -49,74 +53,101 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div>
-      {step === 1 && (
-        <form onSubmit={handleEmailSubmit}>
-          <h2>Forgot Password</h2>
-          <label>
-            Email:
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-          <button type="submit" disabled={loading}>
-            {loading ? 'Sending...' : 'Send Reset Code'}
-          </button>
-          {message && <p>{message}</p>}
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-        </form>
-      )}
-      {step === 2 && (
-        <form onSubmit={handlePasswordSubmit}>
-          <h2>Reset Password</h2>
-          <label>
-            Reset Code:
-            <input
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            New Password:
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Confirm Password:
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </label>
-          <button type="submit" disabled={loading}>
-            {loading ? 'Resetting...' : 'Reset Password'}
-          </button>
-          {message && <p>{message}</p>}
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-        </form>
-      )}
+    <div className="forgot-password-container">
+      <div className="forgot-password-form-wrapper">
+        {step === 1 && (
+          <form onSubmit={handleEmailSubmit} className="forgot-password-form">
+            <h2>Forgot Password</h2>
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="Enter your email"
+              />
+            </div>
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="reset-button"
+            >
+              {loading ? 'Sending...' : 'Send Reset Code'}
+            </button>
+            {message && <div className="message success-message">{message}</div>}
+            {error && <div className="message error-message">{error}</div>}
+            <div className="back-to-login">
+              <Link to="/signin">Return to Login</Link>
+            </div>
+          </form>
+        )}
+        {step === 2 && (
+          <form onSubmit={handlePasswordSubmit} className="forgot-password-form">
+            <h2>Reset Password</h2>
+            <div className="form-group">
+              <label htmlFor="code">Reset Code</label>
+              <input
+                type="text"
+                id="code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                required
+                placeholder="Enter the code from your email"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="newPassword">New Password</label>
+              <input
+                type="password"
+                id="newPassword"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                placeholder="Enter new password"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                placeholder="Confirm new password"
+              />
+            </div>
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="reset-button"
+            >
+              {loading ? 'Resetting...' : 'Reset Password'}
+            </button>
+            {message && <div className="message success-message">{message}</div>}
+            {error && <div className="message error-message">{error}</div>}
+            <div className="back-to-login">
+              <Link to="/signin">Return to Login</Link>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 };
 
-// Replace with your actual API call functions
 const sendResetCode = async (data) => {
-  // Implement API call to send reset code
+  return new Promise((resolve) => {
+    setTimeout(() => resolve({ success: true }), 1000);
+  });
 };
 
 const resetPassword = async (data) => {
-  // Implement API call to reset password
+  return new Promise((resolve) => {
+    setTimeout(() => resolve({ success: true }), 1000);
+  });
 };
 
 export default ForgotPassword;

@@ -1,12 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import React from "react";
+import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./CssSheets/SignUp.css";
+import { useFormValidation } from "../hooks/useFormValidation";
+import { useSignUp } from "../hooks/useSignUp";
 
 const SignUp = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const initialState = {
     firstName: "",
     lastName: "",
     email: "",
@@ -16,60 +17,10 @@ const SignUp = () => {
     confirmPassword: "",
     dateOfBirth: "",
     institution: "",
-  });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
   };
 
-  const validatePassword = (password) => {
-    const re =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return re.test(password);
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.firstName.trim())
-      newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    if (!formData.username.trim()) newErrors.username = "Username is required";
-    if (!formData.gender.trim()) newErrors.gender = "Gender is required";
-    if (!formData.password) newErrors.password = "Password is required";
-    if (!formData.confirmPassword)
-      newErrors.confirmPassword = "Confirm password is required";
-    if (!formData.dateOfBirth.trim())
-      newErrors.dateOfBirth = "Date of birth is required";
-    if (!formData.institution.trim())
-      newErrors.institution = "Institution is required";
-    if (formData.email && !validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-    if (formData.password && !validatePassword(formData.password)) {
-      newErrors.password =
-        "Password must be at least 8 characters and include uppercase, lowercase, number and special character";
-    }
-    if (
-      formData.password &&
-      formData.confirmPassword &&
-      formData.password !== formData.confirmPassword
-    ) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-    return newErrors;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
-    }
-  };
+  const { formData, errors, setErrors, handleChange, validateForm } = useFormValidation(initialState);
+  const { isSubmitting, submitSignUp } = useSignUp();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,56 +30,14 @@ const SignUp = () => {
       toast.error("Please correct the errors in the form");
       return;
     }
-    setIsSubmitting(true);
-    try {
-      const response = await axios.post(
-        "https://api.example.com/signup",
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.status === 201) {
-        toast.success("Account created successfully!");
-        if (response.data.token) {
-          localStorage.setItem("authToken", response.data.token);
-        }
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      }
-    } catch (error) {
-      console.error("Signup error:", error);
-      if (error.response) {
-        const { status, data } = error.response;
-        if (status === 409) {
-          toast.error(data.message || "Email or username already in use");
-        } else if (status === 400) {
-          toast.error(data.message || "Invalid form data");
-          if (data.errors) {
-            setErrors(data.errors);
-          }
-        } else {
-          toast.error("Server error. Please try again later.");
-        }
-      } else if (error.request) {
-        toast.error(
-          "No response from server. Please check your internet connection."
-        );
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    await submitSignUp(formData, setErrors);
   };
 
   return (
     <div className="signup-container">
       <div className="signup-form-wrapper">
-        <h1>Create an Account</h1>
+        <h1>Nexus</h1>
+        <h2>Create an Account on Nexus</h2>
         <form onSubmit={handleSubmit} className="signup-form">
           <div className="form-group">
             <label htmlFor="firstName">First Name</label>
@@ -216,8 +125,8 @@ const SignUp = () => {
             <label htmlFor="dateOfBirth">Date of Birth</label>
             <input
               type="date"
-              id="dateOfBirth" // Corrected id
-              name="dateOfBirth" // Corrected name
+              id="dateOfBirth" 
+              name="dateOfBirth" 
               value={formData.dateOfBirth}
               onChange={handleChange}
               className={errors.dateOfBirth ? "error" : ""}
@@ -254,7 +163,7 @@ const SignUp = () => {
               onChange={handleChange}
               className={errors.password ? "error" : ""}
               disabled={isSubmitting}
-              placeholder="Enter your password"
+              placeholder="Enter your 8 digit password"
             />
             {errors.password && (
               <span className="error-message">{errors.password}</span>
@@ -278,17 +187,17 @@ const SignUp = () => {
           </div>
           <button
             type="submit"
-            className="submit-button"
+            className={`submit-button ${isSubmitting ? 'submitting' : ''}`}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Creating Account..." : "Sign Up"}
           </button>
           <div className="login-link">
-            Already have an account? <a href="/Signin">Log In</a>
+            Already have an account? <Link to="/Signin">Log In</Link>
           </div>
         </form>
       </div>
-      <ToastContainer />
+      <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );
 };
