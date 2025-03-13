@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: Collab-Project
+
+  datasource:
+    url: jdbc:postgresql://aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+    username: postgres.wcmigjlaaoplbydadlzx
+    password: "Coll@bproject2025"
+    driverClassName: org.postgresql.Driver
+
+  jpa:
+
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+    properties:
+      hibernate:
+        transaction:
+          coordinator_class: jdbc
+
+    show-sql: true
+
+jwt:
+  secret: av7Mp5zVtb3S467pWQ6A1MXRr0tBrqydU6+MeMfEQSw=
+
+sendgrid:
+  api:
+    key: SOOixxbHF2ilJ88LTTW1GOwaV5qMVSaz
+
+    email: dogovicky05@gmail.com

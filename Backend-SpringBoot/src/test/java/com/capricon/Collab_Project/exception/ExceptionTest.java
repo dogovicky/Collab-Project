@@ -1,6 +1,7 @@
 package com.capricon.Collab_Project.exception;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
