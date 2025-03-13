@@ -3,6 +3,7 @@ package com.capricon.Collab_Project.model;
 import com.capricon.Collab_Project.model.enums.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "users")
 public class User {
 
@@ -57,7 +59,13 @@ public class User {
     private Timestamp createdAt;
 
     @Column(name = "fieldOfInterest", columnDefinition = "TEXT[]")
-    private String[] fieldOfInterest;
+    private List<String> fieldOfInterest;
+
+    @Column(name = "isEnabled")
+    private Boolean isEnabled;
+
+    @Column(name = "verificationCode")
+    private String verificationCode;
 
     @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL)
     private List<CommunityMembership> communityMemberships;
