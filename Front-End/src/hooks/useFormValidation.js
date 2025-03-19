@@ -4,6 +4,13 @@ export const useFormValidation = (initialState) => {
   const [formData, setFormData] = useState(initialState);
   const [errors, setErrors] = useState({});
 
+  const formatFieldName = (field) => {
+    return field
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .replace(/ Of /g, ' of ');
+  };
+
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
@@ -14,37 +21,71 @@ export const useFormValidation = (initialState) => {
     return re.test(password);
   };
 
-  const validateForm = () => {
+  const validateForm = (fieldsToValidate = Object.keys(formData)) => {
     const newErrors = {};
     
-    Object.entries(formData).forEach(([key, value]) => {
-      if (!value?.trim()) {
-        newErrors[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
+    fieldsToValidate.forEach((field) => {
+      const value = formData[field];
+      const fieldName = formatFieldName(field);
+
+      // Required field validation
+      if (!value?.toString().trim()) {
+        newErrors[field] = `${fieldName} is required`;
+        return;
+      }
+
+      // Field-specific validations
+      switch(field) {
+        case 'email':
+          if (!validateEmail(value)) {
+            newErrors.email = "Please enter a valid email address";
+          }
+          break;
+          
+        case 'password':
+          if (!validatePassword(value)) {
+            newErrors.password = "Password must be at least 8 characters and include uppercase, lowercase, number and special character";
+          }
+          break;
+          
+        case 'confirmPassword':
+          if (value !== formData.password) {
+            newErrors.confirmPassword = "Passwords do not match";
+          }
+          break;
+          
+        case 'dateOfBirth': {
+          const dob = new Date(value);
+          const age = new Date().getFullYear() - dob.getFullYear();
+          if (age < 13) {
+            newErrors.dateOfBirth = "You must be at least 13 years old";
+          }
+          break;
+        }
       }
     });
-
-    if (formData.email && !validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    if (formData.password && !validatePassword(formData.password)) {
-      newErrors.password = "Password must be at least 8 characters and include uppercase, lowercase, number and special character";
-    }
-
-    if (formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
 
     return newErrors;
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    const processedValue = type === 'date' ? new Date(value).toISOString().split('T')[0] : value;
+    
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
+    
+    // Clear error if user starts correcting
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
 
-  return { formData, errors, setErrors, handleChange, validateForm };
+  return { 
+    formData, 
+    errors, 
+    setErrors, 
+    handleChange, 
+    validateForm,
+    setFormData // Optional: Add if you need direct access
+  };
 };

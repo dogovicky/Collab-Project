@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 const SearchBar = ({ onSearch }) => {
     const [query, setQuery] = useState('');
     const [searchType, setSearchType] = useState('community');
+    const [error, setError] = useState('');
 
     const handleInputChange = (e) => {
         setQuery(e.target.value);
+        setError(''); // Clear error when user starts typing
     };
 
     const handleSearchTypeChange = (e) => {
@@ -13,6 +15,10 @@ const SearchBar = ({ onSearch }) => {
     };
 
     const handleSearch = () => {
+        if (!query.trim()) {
+            setError('Search query cannot be empty.');
+            return;
+        }
         onSearch(query, searchType);
     };
 
@@ -24,12 +30,9 @@ const SearchBar = ({ onSearch }) => {
                 onChange={handleInputChange}
                 placeholder="Search..."
             />
-            <select value={searchType} onChange={handleSearchTypeChange}>
-                <option value="community">Community</option>
-                <option value="post">Post</option>
-                <option value="username">Username</option>
-            </select>
+            
             <button onClick={handleSearch}>Search</button>
+            {error && <p className="error">{error}</p>}
         </div>
     );
 };
