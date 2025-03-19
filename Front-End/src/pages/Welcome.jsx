@@ -14,7 +14,7 @@ const Welcome = () => {
   return (
     <div className="welcome-container">
       <div className="welcome-content">
-        <h1>Welcome to Nexus</h1>
+        <h1>Welcome to Nexus create account</h1>
         <p>Your ultimate platform for academic, professional growth and connection.</p>
         <button onClick={handleGetStarted}>Get Started</button>
         <div className="signin-link">
