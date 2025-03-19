@@ -24,16 +24,16 @@ public class Community {
     @Column(name = "uuid")
     private UUID uuid;
 
-    @Column(name = "communityName", unique = true, nullable = false)
+    @Column(name = "community_name", unique = true, nullable = false)
     private String communityName;
     private String description;
 
-    @Column(name = "createdAt", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
 
 
     @ManyToOne
-    @JoinColumn(name = "UUID", nullable = false, referencedColumnName = "UUID")
+    @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
     @OneToMany(mappedBy = "communityId", cascade = CascadeType.ALL)

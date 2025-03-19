@@ -20,21 +20,23 @@ public class Connection {
     @Id
     @GeneratedValue
     @UuidGenerator
+    @Column(name = "connection_id")
     private UUID connectionId;
 
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false) //The initiator of the connection
+    @JoinColumn(name = "user_id", nullable = false) //The initiator of the connection
     private User userId;
 
     @ManyToOne
-    @JoinColumn(name = "connectedUserId", nullable = false) //The receiver of the connection
+    @JoinColumn(name = "connected_user_id", nullable = false) //The receiver of the connection
     private User connectedUserId;
 
     @Column(columnDefinition = "connectionStatus")
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Column(name = "created_at")
     private Timestamp createdAt;
 
 }

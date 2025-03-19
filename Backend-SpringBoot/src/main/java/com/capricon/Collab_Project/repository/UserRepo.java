@@ -12,11 +12,8 @@ public interface UserRepo extends JpaRepository<User, UUID> {
     //Jpa Repository provides built in methods for performing basic CRUD operations
 
     //Custom method to find user by their username
-    User findByUsername(String username);
-
-    Boolean existsByEmail(String email);
-
-    Boolean existsByUsername(String username);
+    Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
 
     Optional<User> findByUsernameOrEmail(String username, String email);
 
