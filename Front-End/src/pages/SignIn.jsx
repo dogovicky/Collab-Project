@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
+import { useAuth } from '../context/AuthContext';
 import "./CssSheets/SignIn.css";
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -42,33 +43,13 @@ const SignIn = () => {
 
     setIsSubmitting(true);
 
-    try {
-      const response = await axios.post(
-        "https://api.example.com/login",
-        {
-          email: formData.email,
-          password: formData.password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.status === 200 && response.data.token) {
-        localStorage.setItem("authToken", response.data.token);
-        toast.success("Logged in successfully!");
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 1500);
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Login failed. Please try again.");
-    } finally {
+    setTimeout(() => {
+      const mockToken = "mock-auth-token-123";
+      login(mockToken); // Use the login function from auth context
+      toast.success("Logged in successfully!");
       setIsSubmitting(false);
-    }
+      navigate("/home");
+    }, 1000);
   };
 
   const handleForgotPassword = () => {
