@@ -8,6 +8,7 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
 import Welcome from './pages/Welcome';
+import Messages from './pages/Messages';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/emailValidation" element={<EmailValidation />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/messages" element={<Messages />} />
           <Route
             path="/home"
             element={
