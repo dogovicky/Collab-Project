@@ -19,10 +19,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<ErrorResponse> handleGenericBaseException(BaseException ex, HttpServletRequest request) {
+
+        log.error("Unhandled exception occurred: ", ex);
+        String errorMessage = (ex != null) ? (ex.getMessage() != null ? ex.getMessage() : "Unknown error") : "Unknown error";
+
         ErrorResponse errorResponse = ErrorResponse.of(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "INTERNAL_ERROR",
-                ex.getMessage(),
+                errorMessage,
                 request.getRequestURI()
         );
 

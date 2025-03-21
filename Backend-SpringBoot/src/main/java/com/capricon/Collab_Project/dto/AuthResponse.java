@@ -1,17 +1,15 @@
 package com.capricon.Collab_Project.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTOResponse implements Serializable {
+public class AuthResponse {
 
-    private UserDTO userDTO;
+    private String message;
     private String token;
 
 }

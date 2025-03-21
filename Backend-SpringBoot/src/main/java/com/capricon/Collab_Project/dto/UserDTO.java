@@ -1,5 +1,6 @@
 package com.capricon.Collab_Project.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,6 +31,7 @@ public class UserDTO {
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,20}$",
             message = "Password must have at least one lowercase, one uppercase, one special character," +
                     " one number and must not be less than 8 characters")
+    @JsonIgnore
     private String password;
 
     @NotBlank(message = "Phone number is required")
