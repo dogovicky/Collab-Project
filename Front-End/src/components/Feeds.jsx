@@ -3,7 +3,7 @@ import Post from './Post';
 
 const Feeds = ({ posts }) => {
     return (
-        <div>
+        <div style={{ height: '500px', overflowY: 'scroll' }}>
             {posts.map((post, index) => (
                 <Post key={index} post={post} />
             ))}
