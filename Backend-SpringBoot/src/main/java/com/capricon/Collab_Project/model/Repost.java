@@ -19,16 +19,18 @@ public class Repost {
     @Id
     @GeneratedValue
     @UuidGenerator
+    @Column(name = "repost_id")
     private UUID repostId;
 
     @ManyToOne
-    @JoinColumn(name = "postId", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post postId;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User userId;
 
+    @Column(name = "reposted_at")
     private Timestamp repostedAt;
 
 }

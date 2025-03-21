@@ -1,5 +1,8 @@
 package com.capricon.Collab_Project.configuration;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -20,6 +23,12 @@ public class AsyncConfig {
         taskExecutor.setThreadNamePrefix("Async-Thread-");
         taskExecutor.initialize();
         return taskExecutor;
+    }
+
+    @Bean
+    public Validator validator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        return factory.getValidator();
     }
 
 }

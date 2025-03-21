@@ -20,26 +20,29 @@ public class Attachment {
     @Id
     @GeneratedValue
     @UuidGenerator
+    @Column(name = "attachment_id")
     private UUID attachmentId;
 
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private User userId;
 
     @ManyToOne
-    @JoinColumn(name = "postId")
+    @JoinColumn(name = "post_id")
     private Post postId;
 
     @ManyToOne
-    @JoinColumn(name = "messageId")
+    @JoinColumn(name = "message_id")
     private Message messageId;
 
+    @Column(name = "file_url")
     private String fileUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "attachmentType")
+    @Column(name = "file_type", columnDefinition = "attachmentType")
     private AttachmentType fileType;
 
+    @Column(name = "uploaded_at")
     private Timestamp uploadedAt;
 
 }

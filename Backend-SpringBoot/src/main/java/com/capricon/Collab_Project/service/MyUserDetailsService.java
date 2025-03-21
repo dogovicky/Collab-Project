@@ -1,5 +1,6 @@
 package com.capricon.Collab_Project.service;
 
+import com.capricon.Collab_Project.exception.UserException;
 import com.capricon.Collab_Project.model.User;
 import com.capricon.Collab_Project.model.UserPrincipal;
 import com.capricon.Collab_Project.repository.UserRepo;
@@ -19,10 +20,10 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepo.findByUsername(username);
-        if (user != null) {
-            return new UserPrincipal(user);
-        }
-        return null;
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new UserException("User does not exist"));
+
+        return new UserPrincipal(user);
+
     }
 }
