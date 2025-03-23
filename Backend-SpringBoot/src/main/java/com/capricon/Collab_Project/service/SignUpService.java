@@ -1,7 +1,7 @@
 package com.capricon.Collab_Project.service;
 
+import com.capricon.Collab_Project.dto.AuthResponse;
 import com.capricon.Collab_Project.dto.UserDTO;
-import com.capricon.Collab_Project.dto.UserDTOResponse;
 import com.capricon.Collab_Project.dto.ValidationRequest;
 import com.capricon.Collab_Project.exception.BaseException;
 import com.capricon.Collab_Project.exception.BusinessException;
@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.rmi.ServerException;
+
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
@@ -35,14 +35,16 @@ public class SignUpService {
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
     private final JwtService jwtService;
+    private final Executor executor;
 
     public SignUpService(UserRepo userRepo, PasswordEncoder passwordEncoder, MailService mailService,
-                       JwtService jwtService, Validator validator) {
+                         JwtService jwtService, Validator validator, Executor executor) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.mailService = mailService;
         this.jwtService = jwtService;
         this.validator = validator;
+        this.executor = executor;
     }
 
     private void validateRequest(UserDTO request) {
@@ -52,14 +54,18 @@ public class SignUpService {
         }
     }
 
-
     public CompletableFuture<String> signUp(UserDTO request) {
         return CompletableFuture.supplyAsync(() -> {
             validateRequest(request);
             return signUpRequest(request);
         }).exceptionally(ex -> {
-            log.error("Error during sign up for user {}: {}", request.getUsername(), ex.getMessage());
             Throwable cause = ex.getCause();
+            log.error("Error during sign up for user {}: {}", request.getUsername(), ex.getMessage());
+
+            if (cause == null) {
+                throw new BaseException("Validation failed: " + ex.getMessage());
+            }
+
             throw (cause instanceof ValidationException || cause instanceof UserException || cause instanceof BusinessException)
                     ? new CompletionException(cause)
                     : new BaseException("Sign up failed");
@@ -102,39 +108,38 @@ public class SignUpService {
         return "Registration successful. Check your email for account verification code.";
     }
 
+
+    public CompletableFuture<AuthResponse> verifyAccountByCode(ValidationRequest request) {
+        return CompletableFuture.supplyAsync(() -> verifyAccount(request), executor)
+                .exceptionally(ex -> {
+                    Throwable cause = ex.getCause();
+                    log.error("Failed to validate account {}: {}", request.getUsername(), ex.getMessage());
+
+                    if (cause == null) {
+                        throw new BaseException("Validation failed: " + ex.getMessage());
+                    }
+                    throw (cause instanceof ValidationException || cause instanceof UserException
+                            || cause instanceof BusinessException)
+                            ? new CompletionException(cause)
+                            : new BaseException("Account validation failed");
+                });
+    }
+
     @Transactional
-    public CompletableFuture<UserDTOResponse> verifyAccount(ValidationRequest request) {
-        return CompletableFuture.supplyAsync(() -> {
-            User user = userRepo.findByUsername(request.getUsername())
-                    .orElseThrow(() -> new UserException("User does not exist"));
+    public AuthResponse verifyAccount(ValidationRequest request) {
+        User user = userRepo.findByUsername(request.getUsername())
+                .orElseThrow(() -> new UserException("User does not exist"));
 
-            if (!user.getVerificationCode().equals(request.getCode())) {
-                throw new ValidationException("Invalid verification code");
-            }
+        if (!user.getVerificationCode().equals(request.getCode())) {
+            throw new ValidationException("Invalid verification code");
+        }
 
-            user.setIsEnabled(true);
-            user.setVerificationCode(null);
-            userRepo.save(user);
+        user.setIsEnabled(true);
+        user.setVerificationCode(null);
+        userRepo.save(user);
 
-            UserDTO userDTO = UserDTO.builder()
-                    .fullName(user.getFullName())
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .bio(user.getBio())
-                    .dateOfBirth(user.getDateOfBirth())
-                    .fieldOfInterest(user.getFieldOfInterest())
-                    .gender(String.valueOf(user.getGender()))
-                    .build();
-            return new UserDTOResponse( userDTO, jwtService.generateToken(request.getUsername()));
-
-        }).exceptionally(ex -> {
-            Throwable cause = ex.getCause();
-            log.error("Failed to verify account {}: {}", request.getUsername(), cause.getMessage());
-
-            throw (cause instanceof ValidationException) ? new CompletionException(cause)
-                    : new CompletionException(new ServerException("Account verification failed"));
-        });
-
+        return new AuthResponse("Account validation successful",
+                jwtService.generateToken(request.getUsername()));
     }
 
 }

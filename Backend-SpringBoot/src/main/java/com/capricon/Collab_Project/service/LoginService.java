@@ -1,8 +1,8 @@
 package com.capricon.Collab_Project.service;
 
+import com.capricon.Collab_Project.dto.AuthResponse;
 import com.capricon.Collab_Project.dto.LoginRequest;
-import com.capricon.Collab_Project.dto.UserDTO;
-import com.capricon.Collab_Project.dto.UserDTOResponse;
+import com.capricon.Collab_Project.exception.BaseException;
 import com.capricon.Collab_Project.exception.BusinessException;
 import com.capricon.Collab_Project.exception.UserException;
 import com.capricon.Collab_Project.exception.ValidationException;
@@ -34,7 +34,7 @@ public class LoginService {
         this.authManager = authManager;
     }
 
-    public CompletableFuture<UserDTOResponse> loginUser(LoginRequest request) {
+    public CompletableFuture<AuthResponse> loginUser(LoginRequest request) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 User user = userRepo.findByUsername(request.getUsername())
@@ -51,13 +51,7 @@ public class LoginService {
                 if (auth.isAuthenticated()) {
                     String token = jwtService.generateToken(request.getUsername());
 
-                    UserDTO userDTO = UserDTO.builder()
-                            .username(user.getUsername())
-                            .fullName(user.getFullName())
-                            .email(user.getEmail())
-                            .build();
-
-                    return new UserDTOResponse(userDTO, token);
+                    return new AuthResponse("Login successful", token);
                 } else {
                     throw new ValidationException("Authentication Failed");
                 }
@@ -69,6 +63,10 @@ public class LoginService {
 
         }).exceptionally(ex -> {
             Throwable cause = ex.getCause();
+            log.error("Login failed {}: {}", request.getUsername(), ex.getMessage());
+            if (cause == null) {
+                throw new BaseException("Validation failed: " + ex.getMessage());
+            }
             throw (cause instanceof ValidationException
                     || cause instanceof UserException
                     || cause instanceof BusinessException)

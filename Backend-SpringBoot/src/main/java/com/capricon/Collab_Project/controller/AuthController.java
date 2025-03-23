@@ -1,10 +1,9 @@
 package com.capricon.Collab_Project.controller;
 
+import com.capricon.Collab_Project.dto.AuthResponse;
 import com.capricon.Collab_Project.dto.LoginRequest;
 import com.capricon.Collab_Project.dto.UserDTO;
-import com.capricon.Collab_Project.dto.UserDTOResponse;
 import com.capricon.Collab_Project.dto.ValidationRequest;
-//import com.capricon.Collab_Project.service.AuthService;
 import com.capricon.Collab_Project.service.LoginService;
 import com.capricon.Collab_Project.service.PasswordResetService;
 import com.capricon.Collab_Project.service.SignUpService;
@@ -39,13 +38,13 @@ public class AuthController {
     }
 
     @PostMapping("/verify-account")
-    public CompletableFuture<UserDTOResponse> verifyAccount(@Valid @RequestBody ValidationRequest request) {
-        return signUpService.verifyAccount(request);
+    public CompletableFuture<ResponseEntity<AuthResponse>> verifyAccount(@Valid @RequestBody ValidationRequest request) {
+        return signUpService.verifyAccountByCode(request).thenApply(ResponseEntity::ok);
     }
 
     @PostMapping("/login")
-    public CompletableFuture<UserDTOResponse> login(@Valid @RequestBody LoginRequest request) {
-        return loginService.loginUser(request);
+    public CompletableFuture<ResponseEntity<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+        return loginService.loginUser(request).thenApply(ResponseEntity::ok);
     }
 
     @PostMapping("/forgot-password")

@@ -7,12 +7,14 @@ import com.capricon.Collab_Project.model.User;
 import com.capricon.Collab_Project.repository.PasswordResetTokenRepo;
 import com.capricon.Collab_Project.repository.UserRepo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -30,6 +32,7 @@ public class PasswordResetService {
         this.mailService = mailService;
         this.resetTokenRepo = resetTokenRepo;
     }
+
 
     public void requestPasswordReset(String email) {
 

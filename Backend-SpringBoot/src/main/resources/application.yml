@@ -18,6 +18,13 @@ spring:
           coordinator_class: jdbc
     show-sql: true
 
+  rabbitmq:
+    host: amqps://cow.rmq2.cloudamqp.com
+    port: 5672
+    username: slzjfjxx
+    password: UsrrZc_Z1dWw2zz03GwpSGrRPDtrlzhX
+    virtual-host: slzjfjxx
+
 jwt:
   secret: av7Mp5zVtb3S467pWQ6A1MXRr0tBrqydU6+MeMfEQSw=
 
