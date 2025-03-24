@@ -6,9 +6,10 @@ config :backend_elixir,
 
 config :backend_elixir, BackendElixir.Repo, ssl: false
 
-# RabbitMQ Configuration
-# config :backend_elixir, BackendElixir.RabbitMQ,
-# amqp_url: System.get_env("RABBITMQ_URL") || "amqp://guest:guest@localhost:5672/"
+# Load RabbitMQ URL from environment
+rabbitmq_url = System.get_env("RABBITMQ_URL") || "amqps://your-default-url"
+
+config :backend_elixir, BackendElixir.RabbitMQ, url: rabbitmq_url
 
 # Import environment-specific configurations
 import_config "#{Mix.env()}.exs"
