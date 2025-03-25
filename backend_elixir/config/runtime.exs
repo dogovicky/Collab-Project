@@ -1,4 +1,3 @@
-# filepath: /home/elon/Collab_project/Collab-Project/backend_elixir/config/runtime.exs
 import Config
 require Logger
 
@@ -7,11 +6,12 @@ if System.get_env("PHX_SERVER") do
 end
 
 # RabbitMQ Configuration
-rabbitmq_url = System.get_env("RABBITMQ_URL")
+rabbitmq_url =
+  System.get_env("RABBITMQ_URL") ||
+    "amqps://slzjfjxx:UsrrZc_Z1dWw2zz03GwpSGrRPDtrlzhX@cow.rmq2.cloudamqp.com:5671/slzjfjxx"
 
 if is_nil(rabbitmq_url) or rabbitmq_url == "" do
   Logger.warning(" WARNING: RABBITMQ_URL is not set. Using default CloudAMQP URL.")
-  rabbitmq_url = "amqps://your-default-url"
 else
   Logger.info("Using RabbitMQ URL from environment.")
 end
@@ -23,14 +23,13 @@ rabbitmq_url_debug = String.replace(rabbitmq_url, ~r"//[^@]+@", "//[REDACTED]@")
 Logger.info("RabbitMQ URL: #{rabbitmq_url_debug}")
 
 # SSL Configuration for RabbitMQ
-{:ok, certs} = :public_key.cacerts_get()
+cacertfile_path = "/home/elon/cacert.pem"
 
-ssl_options = [
-  verify: :verify_peer,
-  cacerts: certs
-]
-
-Application.put_env(:backend_elixir, :rabbitmq_ssl_options, ssl_options)
+if File.exists?(cacertfile_path) do
+  Logger.info("CACert file found at #{cacertfile_path}")
+else
+  Logger.error("CACert file not found at #{cacertfile_path}")
+end
 
 if config_env() == :prod do
   database_url =

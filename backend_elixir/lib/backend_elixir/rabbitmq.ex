@@ -1,15 +1,16 @@
 defmodule BackendElixir.RabbitMQ do
   use GenServer
   require Logger
-  alias AMQP.{Channel, Queue, Basic}
+  alias AMQP.{Channel, Connection, Queue, Basic}
 
   # Fetch RabbitMQ URL and SSL options at runtime
-  @rabbitmq_url Application.compile_env(
-                  :backend_elixir,
-                  :rabbitmq_url,
-                  "amqps://your-default-url"
+  @rabbitmq_url System.get_env(
+                  "RABBITMQ_URL",
+                  "amqps://slzjfjxx:UsrrZc_Z1dWw2zz03GwpSGrRPDtrlzhX@cow.rmq2.cloudamqp.com:5671/slzjfjxx"
                 )
-  @ssl_options Application.compile_env(:backend_elixir, :rabbitmq_ssl_options, [])
+
+  # SSL Options (Ensure CA Cert file is correctly loaded)
+  @cacertfile "/home/elon/cacert.pem"
 
   # Starts the GenServer process and registers it under the module name.
   def start_link(_) do
@@ -30,11 +31,26 @@ defmodule BackendElixir.RabbitMQ do
 
   # Establishes a connection to RabbitMQ and opens a channel with retries.
   defp connect do
+    ssl_options =
+      if File.exists?(@cacertfile) do
+        [
+          verify: :verify_peer,
+          cacertfile: @cacertfile,
+          server_name_indication: ~c"cow.rmq2.cloudamqp.com",
+          customize_hostname_check: [
+            match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
+          ]
+        ]
+      else
+        Logger.warning("CA Cert file not found. Skipping SSL verification.")
+        []
+      end
+
     Logger.info(
-      "Attempting to connect to RabbitMQ at #{@rabbitmq_url} with SSL options: #{@ssl_options}"
+      "Attempting to connect to RabbitMQ at #{@rabbitmq_url} with SSL options: #{inspect(ssl_options)}"
     )
 
-    case AMQP.Connection.open(@rabbitmq_url, ssl_options: @ssl_options) do
+    case Connection.open(@rabbitmq_url, ssl_options: ssl_options) do
       {:ok, conn} ->
         Logger.info("Successfully connected to RabbitMQ")
 
@@ -66,8 +82,8 @@ defmodule BackendElixir.RabbitMQ do
   end
 
   # Handles the GenServer call to publish a message.
-  def handle_call({:publish, queue, message}, _from, state) do
-    case Basic.publish(state.channel, "", queue, message) do
+  def handle_call({:publish, queue, message}, _from, %{channel: channel} = state) do
+    case Basic.publish(channel, "", queue, message) do
       :ok ->
         {:reply, :ok, state}
 
@@ -78,10 +94,18 @@ defmodule BackendElixir.RabbitMQ do
   end
 
   # Handles the GenServer cast to consume messages.
-  def handle_cast({:consume, queue}, state) do
-    case Queue.subscribe(state.channel, queue, fn payload, _meta ->
-           Logger.info("Received message: #{inspect(payload)}")
-         end) do
+  def handle_cast({:consume, queue}, %{channel: channel} = state) do
+    # Declare the queue if it does not exist
+    case Queue.declare(channel, queue) do
+      {:ok, _} ->
+        Logger.info("Queue #{queue} declared successfully")
+
+      {:error, reason} ->
+        Logger.error("Failed to declare queue #{queue}: #{inspect(reason)}")
+        {:noreply, state}
+    end
+
+    case Basic.consume(channel, queue) do
       {:ok, _consumer_tag} ->
         {:noreply, state}
 
@@ -89,5 +113,23 @@ defmodule BackendElixir.RabbitMQ do
         Logger.error("Failed to consume messages: #{inspect(reason)}")
         {:noreply, state}
     end
+  end
+
+  # Handles unexpected messages
+  def handle_info({:basic_consume_ok, %{consumer_tag: consumer_tag}}, state) do
+    Logger.info("Consumer registered with tag: #{consumer_tag}")
+    {:noreply, state}
+  end
+
+  def handle_info({:basic_deliver, payload, meta}, %{channel: channel} = state) do
+    Logger.info("Received message: #{inspect(payload)}")
+    # Acknowledge the message
+    Basic.ack(channel, meta.delivery_tag)
+    {:noreply, state}
+  end
+
+  def handle_info(msg, state) do
+    Logger.error("Received unexpected message: #{inspect(msg)}")
+    {:noreply, state}
   end
 end

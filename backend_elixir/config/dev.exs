@@ -10,11 +10,16 @@ config :backend_elixir, BackendElixir.Repo,
   ssl: false,
   parameters: [sslmode: "require"],
   show_sensitive_data_on_connection_error: true,
-  pool_size: 15
+  pool_size: 15,
+  timeout: 60_000,
+  queue_target: 50_000,
+  queue_interval: 1_000
 
 # Configure RabbitMQ
 config :backend_elixir, BackendElixir.RabbitMQ,
-  url: System.get_env("RABBITMQ_URL") || "amqp://guest:guest@localhost:5672"
+  url:
+    System.get_env("RABBITMQ_URL") ||
+      "amqps://slzjfjxx:UsrrZc_Z1dWw2zz03GwpSGrRPDtrlzhX@cow.rmq2.cloudamqp.com:5671/slzjfjxx"
 
 # Phoenix Endpoint Configuration
 config :backend_elixir, BackendElixirWeb.Endpoint,
