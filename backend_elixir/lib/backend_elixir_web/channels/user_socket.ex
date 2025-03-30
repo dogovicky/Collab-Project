@@ -25,7 +25,8 @@ defmodule BackendElixirWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   @impl true
-  def connect(%{"user_id" => user_id}, socket, _connect_info) do
+  def connect(params, socket, _connect_info) do
+    user_id = Map.get(params, "user_id", "guest")
     {:ok, assign(socket, :user_id, user_id)}
   end
 

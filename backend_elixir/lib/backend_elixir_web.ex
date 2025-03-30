@@ -1,6 +1,6 @@
 defmodule BackendElixirWeb do
   @moduledoc """
-  The entrypoint for defining your web interface, such
+  The entry point for defining your web interface, such
   as controllers, components, channels, and so on.
 
   This can be used in your application as:
@@ -9,8 +9,8 @@ defmodule BackendElixirWeb do
       use BackendElixirWeb, :html
 
   The definitions below will be executed for every controller,
-  component, etc, so keep them short and clean, focused
-  on imports, uses and aliases.
+  component, etc., so keep them short and clean, focused
+  on imports, uses, and aliases.
 
   Do NOT define functions inside the quoted expressions
   below. Instead, define additional modules and import
@@ -19,6 +19,7 @@ defmodule BackendElixirWeb do
 
   def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
 
+  ## Router definition
   def router do
     quote do
       use Phoenix.Router, helpers: false
@@ -29,26 +30,37 @@ defmodule BackendElixirWeb do
     end
   end
 
+  ## Channel definition
   def channel do
     quote do
       use Phoenix.Channel
     end
   end
 
+  ##  Controller definition
   def controller do
     quote do
       use Phoenix.Controller,
         formats: [:html, :json],
         layouts: [html: BackendElixirWeb.Layouts]
 
-      use Gettext, backend: BackendElixirWeb.Gettext
-
       import Plug.Conn
-
+      import BackendElixirWeb.Gettext
       unquote(verified_routes())
     end
   end
 
+  ##  HTML-related imports
+  def html do
+    quote do
+      use Phoenix.Component
+      import Phoenix.HTML
+      import BackendElixirWeb.Gettext
+      unquote(verified_routes())
+    end
+  end
+
+  ##  Verified Routes for path helpers
   def verified_routes do
     quote do
       use Phoenix.VerifiedRoutes,

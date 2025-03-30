@@ -17,7 +17,8 @@ defmodule BackendElixirWeb.NotificationChannel do
       timestamp: DateTime.utc_now()
     }
 
-    broadcast!(socket, "new_notification", notification)
-    {:noreply, socket}
+    broadcast(socket, "new_notification", notification)
+    # acknowledge receipt
+    {:reply, :ok, socket}
   end
 end

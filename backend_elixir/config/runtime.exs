@@ -1,6 +1,7 @@
 import Config
 require Logger
 
+# Enable Phoenix server if PHX_SERVER is set
 if System.get_env("PHX_SERVER") do
   config :backend_elixir, BackendElixirWeb.Endpoint, server: true
 end
@@ -8,41 +9,48 @@ end
 # RabbitMQ Configuration
 rabbitmq_url =
   System.get_env("RABBITMQ_URL") ||
-    "amqps://slzjfjxx:UsrrZc_Z1dWw2zz03GwpSGrRPDtrlzhX@cow.rmq2.cloudamqp.com:5671/slzjfjxx"
+    raise "ERROR: RABBITMQ_URL is not set. Please export it before running the app."
 
-if is_nil(rabbitmq_url) or rabbitmq_url == "" do
-  Logger.warning(" WARNING: RABBITMQ_URL is not set. Using default CloudAMQP URL.")
-else
-  Logger.info("Using RabbitMQ URL from environment.")
-end
+# Log RabbitMQ URL for debugging (without exposing credentials)
+rabbitmq_url_debug = String.replace(rabbitmq_url, ~r"//[^@]+@", "//[REDACTED]@")
+Logger.info("Using RabbitMQ URL: #{rabbitmq_url_debug}")
 
+# Store RabbitMQ URL in the application environment
 Application.put_env(:backend_elixir, :rabbitmq_url, rabbitmq_url)
 
-# Debugging: Log RabbitMQ URL (without credentials)
-rabbitmq_url_debug = String.replace(rabbitmq_url, ~r"//[^@]+@", "//[REDACTED]@")
-Logger.info("RabbitMQ URL: #{rabbitmq_url_debug}")
-
-# SSL Configuration for RabbitMQ
+# RabbitMQ SSL Configuration
+rabbitmq_host = System.get_env("RABBITMQ_HOST") || raise "ERROR: RABBITMQ_HOST is not set!"
 cacertfile_path = "/home/elon/cacert.pem"
 
-if File.exists?(cacertfile_path) do
-  Logger.info("CACert file found at #{cacertfile_path}")
-else
-  Logger.error("CACert file not found at #{cacertfile_path}")
+unless File.exists?(cacertfile_path) do
+  Logger.error(
+    "CACert file not found at #{cacertfile_path}. Ensure it exists for SSL verification."
+  )
 end
 
+Application.put_env(:backend_elixir, :rabbitmq_ssl_options,
+  verify: :verify_peer,
+  cacertfile: cacertfile_path,
+  server_name_indication: rabbitmq_host
+)
+
+# Database Configuration
+database_url =
+  System.get_env("DATABASE_URL") ||
+    raise "ERROR: DATABASE_URL is not set. Please export it before running the app."
+
+# Log database URL without exposing credentials
+Logger.info(
+  "Using Database URL: #{String.replace(database_url, ~r":\/\/[^:]+:[^@]+@", "://[REDACTED]@")}"
+)
+
+config :backend_elixir, BackendElixir.Repo,
+  url: database_url,
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+  socket_options: if(System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: [:inet])
+
+# Production-specific configuration
 if config_env() == :prod do
-  database_url =
-    System.get_env("DATABASE_URL") ||
-      raise "ERROR: DATABASE_URL environment variable is missing."
-
-  maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
-
-  config :backend_elixir, BackendElixir.Repo,
-    url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    socket_options: maybe_ipv6
-
   secret_key_base =
     System.get_env("SECRET_KEY_BASE") ||
       raise "ERROR: SECRET_KEY_BASE is missing. Generate one using: mix phx.gen.secret"
@@ -56,5 +64,7 @@ if config_env() == :prod do
     secret_key_base: secret_key_base
 end
 
-# Ensure the variable is used to avoid the warning
+# Prevent compiler warnings for unused variables
 _ = rabbitmq_url
+_ = database_url
+_ = rabbitmq_host

@@ -5,6 +5,8 @@ defmodule BackendElixir.Application do
 
   @impl true
   def start(_type, _args) do
+    rabbitmq_url = Application.fetch_env!(:backend_elixir, BackendElixir.RabbitMQ)[:url]
+
     children = [
       BackendElixirWeb.Telemetry,
       BackendElixir.Repo,
@@ -12,7 +14,10 @@ defmodule BackendElixir.Application do
       {DNSCluster, query: Application.get_env(:backend_elixir, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: BackendElixir.PubSub},
       {Finch, name: BackendElixir.Finch},
-      BackendElixirWeb.Endpoint
+      BackendElixirWeb.Endpoint,
+
+      # Pass RabbitMQ URL to the consumer
+      {BackendElixir.Messaging.Consumer, url: rabbitmq_url}
     ]
 
     opts = [strategy: :one_for_one, name: BackendElixir.Supervisor]

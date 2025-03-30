@@ -2,10 +2,10 @@ import Config
 
 # Configure your database
 config :backend_elixir, BackendElixir.Repo,
-  username: "postgres.wcmigjlaaoplbydadlzx",
-  password: "Coll@bproject2025",
-  hostname: "aws-0-eu-central-1.pooler.supabase.com",
-  database: "postgres",
+  username: System.get_env("DB_USERNAME") || raise("DB_USERNAME is not set!"),
+  password: System.get_env("DB_PASSWORD") || raise("DB_PASSWORD is not set!"),
+  hostname: System.get_env("DB_HOSTNAME") || raise("DB_HOSTNAME is not set!"),
+  database: System.get_env("DB_NAME") || raise("DB_NAME is not set!"),
   stacktrace: true,
   ssl: false,
   parameters: [sslmode: "require"],
@@ -17,9 +17,7 @@ config :backend_elixir, BackendElixir.Repo,
 
 # Configure RabbitMQ
 config :backend_elixir, BackendElixir.RabbitMQ,
-  url:
-    System.get_env("RABBITMQ_URL") ||
-      "amqps://slzjfjxx:UsrrZc_Z1dWw2zz03GwpSGrRPDtrlzhX@cow.rmq2.cloudamqp.com:5671/slzjfjxx"
+  url: System.get_env("RABBITMQ_URL") || raise("RABBITMQ_URL is not set!")
 
 # Phoenix Endpoint Configuration
 config :backend_elixir, BackendElixirWeb.Endpoint,
@@ -27,7 +25,7 @@ config :backend_elixir, BackendElixirWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "OUFSso0UMiDBT45urviE4tXqHHq8n8UtokUfmOVRuDQpbrGrteIm/s9zL+BBGdxP",
+  secret_key_base: System.get_env("SECRET_KEY_BASE") || raise("SECRET_KEY_BASE is not set!"),
   watchers: []
 
 # Enable dev routes for dashboard and mailbox
