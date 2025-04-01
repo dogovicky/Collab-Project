@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from '../context/AuthContext';
-import { loginUser } from "../../api/auth"; // Import API function
+import { loginUser } from "../api/authA"; // Corrected import path
 import "./CssSheets/SignIn.css";
 import Header from "../components/header";
 
@@ -51,7 +51,7 @@ const SignIn = () => {
       toast.success("Logged in successfully!");
       navigate("/home");
     } catch (error) {
-      toast.error(error.message || "Login failed. Please try again.");
+      toast.error(error.response?.data?.message || "Login failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

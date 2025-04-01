@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './CssSheets/ForgotPassword.css';
-import { requestResetCode, updatePassword } from "../../../api/auth"; // Corrected import path
+import { requestResetCode, updatePassword } from "../api/authA"; // Corrected import path
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);

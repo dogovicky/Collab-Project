@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "../pages/CssSheets/ProfileHeader.css";
-import axios from "axios";
+import { createPost } from "../api/authA"; // Updated import for API usage
 
 const ProfileHeader = ({ user }) => {
   const [isFollowing, setIsFollowing] = useState(user?.isFollowing);

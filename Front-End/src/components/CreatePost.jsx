@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createPost } from '../../../api/auth'; // Adjust the relative path as needed
+import { createPost } from '../api/authA'; // Adjust the relative path as needed
 
 const CreatePost = ({ updateFeed }) => {
   const [text, setText] = useState('');

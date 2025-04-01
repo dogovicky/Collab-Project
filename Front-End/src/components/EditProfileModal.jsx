@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./EditProfileModal.css";
+import { updatePassword } from "../api/authA"; // Import API for potential usage
 
 const EditProfileModal = ({ user, onSave, onClose }) => {
   const [name, setName] = useState(user.name);
