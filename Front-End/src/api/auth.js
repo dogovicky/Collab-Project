@@ -13,7 +13,7 @@ export const signUp = async (formData) => {
     }
   });
 
-  const response = await axios.post("/api/signup", formDataToSend, {
+  const response = await axios.post("https://example.com/api/signup", formDataToSend, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 

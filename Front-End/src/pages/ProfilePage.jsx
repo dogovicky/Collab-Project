@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import ProfileHeader from "../components/ProfileHeader";
 import ProfileStats from "../components/ProfileStats";
 import EditProfileModal from "../components/EditProfileModal";
-import Post from "../components/Post"; // Import Post component
+import Post from "../components/Post"; // Ensure Post component is imported
+import { createPost } from "../api/authA"; // Import API for potential usage
 import "../pages/CssSheets/ProfilePage.css";
 
 const mockUser = {

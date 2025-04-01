@@ -1,7 +1,7 @@
 import { Socket } from 'phoenix';
 
 // Initialize the Phoenix socket connection
-const socket = new Socket('ws://localhost:4000/socket'); // Replace with your Phoenix server URL
+const socket = new Socket('ws://192.168.15.250:4000/socket'); // Replace with your Phoenix server URL
 socket.connect();
 
 // Add error handling

@@ -5,6 +5,7 @@ import Step3 from "./CssSheets/Step3";
 import Step4 from "./CssSheets/Step4";
 import { useSignUp } from "../hooks/useSignUp";
 import { useFormValidation } from "../hooks/useFormValidation";
+import { signUp } from "../api/auth";
 import "./CssSheets/SignUp.css";
 import axios from "axios";
 
@@ -71,15 +72,11 @@ const SignUp = () => {
         setErrors(validationErrors);
         return;
       }
-      const signupSuccess = await submitSignUp(formData, setErrors);
-      if (signupSuccess) {
-        try {
-          // Trigger email verification API
-          await axios.post('/api/send-verification', { email: formData.email });
-          alert('Signup successful! A verification code has been sent to your email.');
-        } catch (err) {
-          alert('Signup successful, but failed to send verification email.');
-        }
+      try {
+        const response = await signUp(formData); // Use the signUp API here
+        alert('Signup successful! A verification code has been sent to your email.');
+      } catch (err) {
+        alert('Signup failed. Please try again.');
       }
     }
   };
