@@ -1,0 +1,101 @@
+/* === User Card Styling === */
+.user-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #466b88; /* Matches refined border color */
+  border-radius: 12px;
+  background-color: #1f3648; /* Matches refined background */
+  color: #f0f0f0;
+  transition: background-color 0.3s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.user-card:hover {
+  background-color: #29465B; /* Slightly lighter on hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* === User Info Styling === */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-picture {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #466b88; /* Consistent border color */
+  transition: transform 0.2s ease;
+}
+
+.profile-picture:hover {
+  transform: scale(1.05);
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f0f0f0; /* Matches refined text color */
+  margin: 0;
+}
+
+.user-username {
+  font-size: 14px;
+  color: #a1b1c2; /* Softer muted tone for consistency */
+  margin: 2px 0 0;
+}
+
+/* === Follow Button Styling === */
+.follow-button {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+/* === Connect Button === */
+.follow-button.connect {
+  background-color: #1a8cd8;
+  color: #ffffff;
+}
+
+.follow-button.connect:hover {
+  background-color: #1177cc;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(26, 140, 216, 0.5);
+}
+
+/* === Disconnect Button === */
+.follow-button.disconnect {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.follow-button.disconnect:hover {
+  background-color: #d6d6d6;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* === Responsive Design === */
+@media (max-width: 768px) {
+  .user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .follow-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+

@@ -1,0 +1,71 @@
+/* Container for the whole input section */
+.message-input {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background-color: #252525;
+    border-top: 1px solid #3a3a3a;
+  }
+  
+  /* Input field styling */
+  .message-input__field {
+    flex: 1;
+    padding: 12px;
+    background-color: #1c1c1c;
+    border: 1px solid #3a3a3a;
+    color: #f5f5f5;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  
+  .message-input__field::placeholder {
+    color: #a1a1a1;
+  }
+  
+  .message-input__field:focus {
+    border-color: #1da1f2;
+  }
+  
+  /* Send button styling */
+  .message-input__button {
+    margin-left: 12px;
+    padding: 12px 20px;
+    background-color: #29465B;
+    color: #f5f5f5;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .message-input__button:hover {
+    background-color: #3b5c77;
+    transform: translateY(-2px);
+  }
+  
+  .message-input__button:active {
+    transform: translateY(0);
+  }
+  
+  .message-input__button:focus {
+    outline: none;
+    border: 1px solid #1da1f2;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .message-input__field {
+      font-size: 13px;
+      padding: 10px;
+    }
+  
+    .message-input__button {
+      font-size: 13px;
+      padding: 10px 16px;
+    }
+  }
+  

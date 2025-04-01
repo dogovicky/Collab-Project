@@ -14,10 +14,7 @@ const Home = () => {
     // Implement search logic here
   };
 
-  const logout = () => {
-    localStorage.removeItem('authToken');
-    window.location.href = '/signin';
-  };
+  
 
   return (
     <div className="home-container">
@@ -25,7 +22,7 @@ const Home = () => {
         <h1 className="logo">Nexus</h1>
         <div className="nav-links">
           <SearchBar onSearch={handleSearch} />
-          <button onClick={logout}>Logout</button>
+          
         </div>
       </nav>
       

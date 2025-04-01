@@ -1,0 +1,146 @@
+/* ProfilePage.css */
+
+.profile-page {
+  background-color: #1e293b; /* Consistent with home page background */
+  color: #f0f4f8; /* Light text color for readability */
+  padding: 24px;
+  min-height: 100vh;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.profile-header,
+.profile-stats {
+  background-color: #334155; /* Slightly lighter than background */
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  margin-bottom: 16px;
+}
+
+.profile-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #f0f4f8;
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: space-between;
+}
+
+.profile-stats div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-stats span {
+  font-size: 18px;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+.profile-stats label {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* Edit Profile Button */
+.profile-page button {
+  background-color: #2563eb; /* Base color */
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  margin-bottom: 20px;
+}
+
+.profile-page button:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* Profile Posts & Reposts */
+.profile-posts,
+.profile-reposts {
+  margin-top: 16px;
+}
+
+.profile-posts h2,
+.profile-reposts h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #f0f4f8;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #2563eb; /* Base color */
+  margin-bottom: 16px;
+}
+
+.post {
+  background-color: #334155;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease;
+}
+
+.post:hover {
+  background-color: #475569;
+}
+
+.post-content {
+  font-size: 16px;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.post-time {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* Comments Section */
+.comments {
+  margin-top: 12px;
+}
+
+.comment {
+  background-color: #1e293b;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.comment:last-child {
+  margin-bottom: 0;
+}
+
+.comment-user {
+  font-weight: 500;
+  color: #f0f4f8;
+}
+
+.comment-content {
+  font-size: 14px;
+  color: #e2e8f0;
+  margin-top: 4px;
+}
+
+/* Avatar Styling */
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #2563eb;
+}
+
