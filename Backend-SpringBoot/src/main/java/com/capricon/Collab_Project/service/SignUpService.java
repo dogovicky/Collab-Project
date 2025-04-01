@@ -55,7 +55,7 @@ public class SignUpService {
             ApiResponse<String> message = transactionTemplate.execute(status -> signUpRequest(request));
 
             //Publish UserDTO as event payload
-            publisher.sendMessage("user", "user.signup.key", request);
+            publisher.sendMessage("notifications", "notifications.key", request);
             return message;
         }).exceptionally(ex -> {
             Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RabbitMQConsumer {
 
-    @RabbitListener(queues = "${spring.rabbitmq.queues.user}")
+    //@RabbitListener(queues = "${spring.rabbitmq.queues.user}")
     public void consumeMessage(UserDTO userDTO) {
         log.info("Received User: {}", userDTO);
     }
