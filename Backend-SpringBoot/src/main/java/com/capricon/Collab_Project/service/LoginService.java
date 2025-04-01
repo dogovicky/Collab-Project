@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -36,15 +37,16 @@ public class LoginService {
                 throw new UserException("Account not yet verified", HttpStatus.UNAUTHORIZED);
             }
 
-            Authentication auth = authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername() , request.getPassword())
-            );
+            try {
+                Authentication auth = authManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+                );
 
-            if (auth.isAuthenticated()) {
                 String token = jwtService.generateToken(request.getUsername());
                 return ApiResponse.success(token, "Login successful");
-            } else {
-                throw new UserException("Authentication failed, please check username or password", HttpStatus.UNAUTHORIZED);
+
+            } catch (BadCredentialsException e) {
+                throw new UserException("Wrong password. Please try again.", HttpStatus.UNAUTHORIZED);
             }
 
         }, executor).exceptionally(ex -> {
