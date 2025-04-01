@@ -15,7 +15,11 @@ const Step1 = ({ formData = {}, handleChange, nextStep, errors = {} }) => {
             required
           />
         </div>
-        {errors.email && <p>{errors.email}</p>}
+        {errors.email && (
+          <p className="error">
+            {errors.email} (e.g., example@domain.com)
+          </p>
+        )}
   
         <div>
           <FaLock />
@@ -28,7 +32,11 @@ const Step1 = ({ formData = {}, handleChange, nextStep, errors = {} }) => {
             required
           />
         </div>
-        {errors.password && <p>{errors.password}</p>}
+        {errors.password && (
+          <p className="error">
+            {errors.password} (Password must be at least 8 characters long, include uppercase, lowercase, a number, and a special character.)
+          </p>
+        )}
   
         <button onClick={nextStep}>Next <FaArrowRight /></button>
       </div>

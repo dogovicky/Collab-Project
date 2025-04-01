@@ -1,64 +1,109 @@
+/* Step4.css */
 .step-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    background-color: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    max-width: 400px;
-    margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  background-color: #1e293b; /* Dark blue background */
+  border: 1px solid #334155;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  margin: 20px auto;
+  font-family: 'Poppins', sans-serif;
+  color: #f1f5f9;
+  transition: transform 0.3s ease;
+}
+
+.step-container:hover {
+  transform: translateY(-4px); /* Subtle lift effect */
+}
+
+/* === Confirmation Text === */
+p {
+  font-size: 18px;
+  font-weight: 500;
+  color: #f1f5f9;
+  margin-bottom: 8px;
+}
+
+/* === JSON Preview === */
+pre {
+  background-color: #0f172a; /* Darker background for contrast */
+  color: #93c5fd; /* Light blue text */
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 14px;
+  border: 1px solid #334155;
+  line-height: 1.5;
+  max-height: 300px;
+}
+
+/* === Button Group === */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* === Back Button === */
+button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Back Button */
+button:first-of-type {
+  background-color: #64748b;
+  color: #f1f5f9;
+}
+
+button:first-of-type:hover {
+  background-color: #4b5563;
+  transform: translateY(-2px);
+}
+
+/* Submit Button */
+button[type="submit"] {
+  background-color: #1e90ff;
+  color: #ffffff;
+}
+
+button[type="submit"]:hover {
+  background-color: #1c7ed6;
+  transform: translateY(-2px);
+}
+
+button[type="submit"]:disabled {
+  background-color: #4c5b70;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* === Responsive Design === */
+@media (max-width: 480px) {
+  .step-container {
+    padding: 20px;
+    gap: 16px;
   }
-  
-  p {
-    font-size: 18px;
-    font-weight: 500;
-    color: #333;
-  }
-  
+
   pre {
-    background-color: #f4f4f4;
+    font-size: 12px;
     padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #555;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    word-wrap: break-word;
   }
-  
+
   button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background-color: #4caf50;
-    color: white;
+    font-size: 14px;
     padding: 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease;
   }
-  
-  button:hover {
-    background-color: #45a049;
-  }
-  
-  button:disabled {
-    background-color: #ccc;
-    color: #777;
-    cursor: not-allowed;
-  }
-  
-  button:first-of-type {
-    background-color: #ccc;
-    color: #333;
-  }
-  
-  button:first-of-type:hover {
-    background-color: #bbb;
-  }
+}
+
   

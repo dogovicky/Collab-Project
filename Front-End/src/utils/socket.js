@@ -1,24 +1,20 @@
-import { io } from 'socket.io-client';
+import { Socket } from 'phoenix';
 
-const SOCKET_URL = 'http://localhost:5000'; // Update with your backend URL
+// Initialize the Phoenix socket connection
+const socket = new Socket('ws://localhost:4000/socket'); // Replace with your Phoenix server URL
+socket.connect();
 
-const socket = io(SOCKET_URL, {
-  autoConnect: true, // Automatically try to reconnect
-  reconnectionAttempts: 5, // Retry up to 5 times
-  reconnectionDelay: 1000, // Start with a 1-second delay between reconnect attempts
-  transports: ['websocket'], // Use WebSocket for better performance
+// Add error handling
+socket.onError(() => {
+  console.error('Socket connection error. Please check the server.');
 });
 
-socket.on('connect', () => {
-  console.log('✅ Connected to socket server:', socket.id);
+socket.onClose(() => {
+  console.warn('Socket connection closed. Attempting to reconnect...');
 });
 
-socket.on('disconnect', (reason) => {
-  console.warn('❌ Disconnected from socket server:', reason);
-});
-
-socket.on('connect_error', (error) => {
-  console.error('⚠️ Connection error:', error.message);
+socket.onOpen(() => {
+  console.log('Socket connected');
 });
 
 export default socket;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Post.css';
 
-const Post = ({ avatarUrl, username, content, initialComments = [], postTime }) => {
+const Post = ({ avatarUrl, username, content, media, initialComments = [], postTime }) => {
     const [likes, setLikes] = useState(0);
     const [liked, setLiked] = useState(false);
     const [comments, setComments] = useState(initialComments);
@@ -43,6 +43,16 @@ const Post = ({ avatarUrl, username, content, initialComments = [], postTime }) 
             </div>
             <div className="post__content">
                 <p>{content}</p>
+                {media && (
+                    media.startsWith('data:video') ? (
+                        <video controls className="post__media">
+                            <source src={media} type="video/mp4/mpeg" />
+                            Your browser does not support the video tag.
+                        </video>
+                    ) : (
+                        <img src={media} alt="Post media" className="post__media" />
+                    )
+                )}
             </div>
             <div className="post__actions">
                 <button onClick={handleLike}>{liked ? '❤️' : '👍'} Like {likes > 0 && `(${likes})`}</button>

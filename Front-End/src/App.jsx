@@ -9,6 +9,9 @@ import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
 import Welcome from './pages/Welcome';
 import Messages from './pages/Messages';
+import Connections from './pages/Connections';
+import ProfilePage from './pages/ProfilePage';
+import NotificationPage from './pages/NotificationPage';
 
 function App() {
   return (
@@ -21,6 +24,10 @@ function App() {
           <Route path="/emailValidation" element={<EmailValidation />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/connections" element={<Connections />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/notifications" element={<NotificationPage />} />
+
           <Route
             path="/home"
             element={

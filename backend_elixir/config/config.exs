@@ -6,7 +6,12 @@ config :backend_elixir,
 
 config :backend_elixir, BackendElixir.Repo, ssl: false
 
-config :backend_elixir, BackendElixirWeb.Endpoint, pubsub_server: BackendElixir.PubSub
+config :backend_elixir, BackendElixirWeb.Endpoint,
+  pubsub_server: BackendElixir.PubSub,
+  # Allows external connections
+  http: [ip: {0, 0, 0, 0}, port: 4000],
+  # Allows frontend requests from any domain (useful for local development)
+  check_origin: false
 
 # Ensure RabbitMQ URL is correctly pulled from the environment
 config :backend_elixir, BackendElixir.RabbitMQ,

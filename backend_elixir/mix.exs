@@ -39,6 +39,7 @@ defmodule BackendElixir.MixProject do
       {:dns_cluster, "~> 0.1.3"},
       {:bandit, "~> 1.5"},
       {:amqp, "~> 3.3"},
+      {:cors_plug, "~> 3.0"},
       {:certifi, "~> 2.8"},
       {:hackney, "~> 1.17"},
       {:plug_cowboy, "~> 2.6"},

@@ -21,6 +21,9 @@ defmodule BackendElixirWeb.Endpoint do
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
 
+  # Allow CORS (React frontend running on another machine)
+  plug CORSPlug, origin: ["http://10.100.145.10:3000"]
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest

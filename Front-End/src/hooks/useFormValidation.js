@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export const useFormValidation = (initialState) => {
   const [formData, setFormData] = useState(initialState);
@@ -47,38 +47,58 @@ export const useFormValidation = (initialState) => {
             newErrors.password = "Password must be at least 8 characters and include uppercase, lowercase, number and special character";
           }
           break;
-          
-        case 'confirmPassword':
-          if (value !== formData.password) {
-            newErrors.confirmPassword = "Passwords do not match";
+
+        case 'firstName':
+        case 'lastName':
+          if (!/^[a-zA-Z]+$/.test(value)) {
+            newErrors[field] = `${fieldName} should only contain letters`;
           }
           break;
-          
-        case 'dateOfBirth': {
-          const dob = new Date(value);
-          const age = new Date().getFullYear() - dob.getFullYear();
-          if (age < 13) {
-            newErrors.dateOfBirth = "You must be at least 13 years old";
+
+        case 'profilePicture':
+          if (!(value instanceof File)) {
+            newErrors.profilePicture = "Please upload a valid profile picture (e.g., .jpg, .png).";
           }
           break;
-        }
+
+        case 'fieldsOfInterest':
+          if (!Array.isArray(value) || value.length === 0) {
+            newErrors.fieldsOfInterest = "Please select at least one field of interest.";
+          }
+          break;
+
+        default:
+          break;
       }
     });
 
+    setErrors(newErrors); // Ensure errors are updated in state
     return newErrors;
   };
 
   const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    const processedValue = type === 'date' ? new Date(value).toISOString().split('T')[0] : value;
-    
-    setFormData(prev => ({ ...prev, [name]: processedValue }));
-    
-    // Clear error if user starts correcting
+    const { name, value, type, files } = e.target;
+    const processedValue = type === 'file' ? files[0] : value;
+
+    setFormData((prev) => ({ ...prev, [name]: processedValue }));
+
+    // Dynamically clear errors for the field being updated
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prevErrors) => {
+        const { [name]: removedError, ...rest } = prevErrors;
+        return rest;
+      });
     }
   };
+
+  // Add useEffect to revalidate when formData changes
+  useEffect(() => {
+    const fieldsWithErrors = Object.keys(errors);
+    if (fieldsWithErrors.length > 0) {
+      const updatedErrors = validateForm(fieldsWithErrors);
+      setErrors(updatedErrors);
+    }
+  }, [formData]);
 
   return { 
     formData, 

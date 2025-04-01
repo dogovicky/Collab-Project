@@ -1,7 +1,7 @@
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import './Step2.css';
 
-const Step2 = ({ formData, handleChange, nextStep, prevStep }) => {
+const Step2 = ({ formData, handleChange, nextStep, prevStep, errors }) => {
   return (
     <div>
       <input
@@ -12,6 +12,11 @@ const Step2 = ({ formData, handleChange, nextStep, prevStep }) => {
         onChange={handleChange}
         required
       />
+      {errors.firstName && (
+        <p className="error">
+          {errors.firstName} (First name should only contain letters.)
+        </p>
+      )}
       <input
         type="text"
         name="lastName"
@@ -20,6 +25,11 @@ const Step2 = ({ formData, handleChange, nextStep, prevStep }) => {
         onChange={handleChange}
         required
       />
+      {errors.lastName && (
+        <p className="error">
+          {errors.lastName} (Last name should only contain letters.)
+        </p>
+      )}
       <button onClick={prevStep}>
         <FaArrowLeft /> Back
       </button>
