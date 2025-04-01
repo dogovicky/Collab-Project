@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,7 +32,6 @@ public class UserDTO {
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&-+=()])(?=\\S+$).{8,20}$",
             message = "Password must have at least one lowercase, one uppercase, one special character," +
                     " one number and must not be less than 8 characters")
-    @JsonIgnore
     private String password;
 
     @NotBlank(message = "Phone number is required")
@@ -46,5 +46,4 @@ public class UserDTO {
 
     private String institution;
     private String bio;
-
 }

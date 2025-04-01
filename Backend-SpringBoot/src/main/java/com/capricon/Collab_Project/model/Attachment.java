@@ -3,8 +3,10 @@ package com.capricon.Collab_Project.model;
 import com.capricon.Collab_Project.model.enums.AttachmentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
@@ -15,6 +17,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Attachment {
 
     @Id
@@ -25,15 +28,15 @@ public class Attachment {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User userId;
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "post_id")
-    private Post postId;
+    private Post post;
 
     @ManyToOne
     @JoinColumn(name = "message_id")
-    private Message messageId;
+    private Message message;
 
     @Column(name = "file_url")
     private String fileUrl;
@@ -42,6 +45,7 @@ public class Attachment {
     @Column(name = "file_type", columnDefinition = "attachmentType")
     private AttachmentType fileType;
 
+    @CreationTimestamp
     @Column(name = "uploaded_at")
     private Timestamp uploadedAt;
 

@@ -1,5 +1,6 @@
 package com.capricon.Collab_Project.service;
 
+import com.capricon.Collab_Project.dto.ApiResponse;
 import com.capricon.Collab_Project.dto.ProfileUpdateRequest;
 import com.capricon.Collab_Project.dto.UserProfileDTO;
 import com.capricon.Collab_Project.exception.BaseException;
@@ -12,8 +13,10 @@ import com.capricon.Collab_Project.model.enums.Gender;
 import com.capricon.Collab_Project.repository.UserRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,57 +39,34 @@ public class UserService {
         this.executor = executor;
     }
 
-    @Async("executor")
-    public CompletableFuture<UserProfileDTO> fetchProfileData(String username) {
 
-        log.info("Fetching profile data asynchronously for user: {} ", username);
-
-        CompletableFuture<UserProfileDTO> future = new CompletableFuture<>();
-        try {
-            UserProfileDTO profileData = getProfileData(username);
-            log.info("Profile data retrieved for user: {}", username);
-            future.complete(profileData);
-        } catch (Exception ex) {
-            log.error("An error occurred during fetching of user: {} ", username);
-            future.completeExceptionally(ex);
-        }
-        return future;
+    @Async
+    public CompletableFuture<ApiResponse<UserProfileDTO>> fetchProfileData(String username) {
+        log.info("SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
+        return CompletableFuture.completedFuture(getProfileData(username))
+                .exceptionally(this::handleServiceProfileException);
     }
 
     @Transactional(readOnly = true)
-    public UserProfileDTO getProfileData(String username) {
-        User user = userRepo.findByUsername(username).orElseThrow(() -> new UserException("User not found"));
-        return new UserProfileDTO(user);
+    public ApiResponse<UserProfileDTO> getProfileData(String username) {
+        User user = userRepo.findProfileDataByUsername(username)
+                .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
+
+        return ApiResponse.success(new UserProfileDTO(user));
     }
 
-    public CompletableFuture<UserProfileDTO> updateUserProfile(ProfileUpdateRequest request) {
+    @Async
+    public CompletableFuture<ApiResponse<UserProfileDTO>> updateUserProfile(ProfileUpdateRequest request) {
         UUID userId = getAuthenticatedUserId();
-        return CompletableFuture.supplyAsync(() ->
-                updateProfile(userId, request), executor)
-                .exceptionally(ex -> {
-                    // Safely get the most specific cause
-                    Throwable cause = NestedExceptionUtils.getMostSpecificCause(ex);
-
-                    // Log with null check for messages
-                    log.error("Failed to update user profile for user {}: {}", userId,
-                            cause.getMessage());
-
-                    // Handle the exception based on type
-                    if (cause instanceof UserException || cause instanceof BusinessException
-                            || cause instanceof TechnicalException) {
-                        throw new CompletionException(cause);
-                    } else {
-                        // Default case, wrap in BaseException
-                        throw new BaseException("Profile update failed: " +
-                                cause.getMessage());
-                    }
-                });
+        return CompletableFuture.completedFuture(updateProfile(userId, request))
+                .exceptionally(this::handleServiceProfileException);
     }
 
 
     @Transactional
-    public UserProfileDTO updateProfile(UUID userId, ProfileUpdateRequest request) {
-        User user = userRepo.findById(userId).orElseThrow(() -> new UserException("User not found: " + userId));
+    public ApiResponse<UserProfileDTO> updateProfile(UUID userId, ProfileUpdateRequest request) {
+        // Find user
+        User user = userRepo.findById(userId).orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
 
         updateIfNotNull(user::setUsername, request.getUsername());
         updateIfNotNull(user::setEmail, request.getEmail());
@@ -100,7 +80,7 @@ public class UserService {
                 user.setGender(Gender.valueOf(request.getGender()));
             }
         } catch (IllegalArgumentException ex) {
-            throw new UserException("Invalid gender value");
+            throw new UserException("Invalid gender value", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getFieldsOfInterest() != null && !request.getFieldsOfInterest().isEmpty()) {
@@ -108,13 +88,13 @@ public class UserService {
         }
 
         userRepo.save(user);
-        return new UserProfileDTO(user);
+        return ApiResponse.success(new UserProfileDTO(user));
     }
 
     private UUID getAuthenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof UserPrincipal)) {
-            throw new UserException("User not authenticated");
+            throw new UserException("User not authenticated", HttpStatus.UNAUTHORIZED);
         }
 
         return ((UserPrincipal) authentication.getPrincipal()).getUuid();
@@ -123,6 +103,21 @@ public class UserService {
     private void updateIfNotNull(Consumer<String> setter, String newValue) {
         if (newValue != null && !newValue.isEmpty()) {
             setter.accept(newValue);
+        }
+    }
+
+
+    public <T> ApiResponse<T> handleServiceProfileException(Throwable ex) {
+        Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
+
+        log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
+
+        if (cause instanceof UserException userException) {
+            return ApiResponse.error(userException.getStatus(), userException.getMessage());
+        } else if (cause instanceof IllegalArgumentException argumentException) {
+            return ApiResponse.error(HttpStatus.BAD_REQUEST, argumentException.getMessage());
+        } else {
+            return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
         }
     }
 

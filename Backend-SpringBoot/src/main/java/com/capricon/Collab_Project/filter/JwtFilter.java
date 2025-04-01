@@ -6,7 +6,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -15,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -30,27 +33,91 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
-        String token = null;
-        String username = null;
+        try {
+            String authHeader = request.getHeader("Authorization");
+            String token = null;
+            String username = null;
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-            username = jwtService.extractUsername(token);
-        }
-
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
-            if (jwtService.validateToken(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, "JWT", userDetails.getAuthorities());
-
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+                try {
+                    username = jwtService.extractUsername(token);
+                } catch (Exception e) {
+                    log.debug("Failed to extract username from token: {}", e.getMessage());
+                }
             }
+
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                try {
+                    UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
+
+                    if (jwtService.validateToken(token, userDetails)) {
+                        UsernamePasswordAuthenticationToken authenticationToken =
+                                new UsernamePasswordAuthenticationToken(userDetails, "JWT", userDetails.getAuthorities());
+
+                        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                        // Create a new context instead of using the existing one
+                        SecurityContext context = SecurityContextHolder.createEmptyContext();
+                        context.setAuthentication(authenticationToken);
+                        SecurityContextHolder.setContext(context);
+                    }
+                } catch (Exception e) {
+                    log.warn("Authentication attempt failed: {}", e.getMessage());
+                }
+            }
+
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            log.error("Exception in JWT filter:", e);
+            filterChain.doFilter(request, response);
         }
-
-        filterChain.doFilter(request, response);
-
     }
+
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+//                                    FilterChain filterChain) throws ServletException, IOException {
+//
+//        try {
+//            String authHeader = request.getHeader("Authorization");
+//            String token = null;
+//            String username = null;
+//
+//            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+//                token = authHeader.substring(7);
+//                try {
+//                    username = jwtService.extractUsername(token);
+//                } catch (Exception e) {
+//                    // Log but don't throw - we'll just treat as unauthenticated
+//                    log.debug("Failed to extract username from token: {}", e.getMessage());
+//                }
+//            }
+//
+//            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+//                try {
+//                    UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
+//
+//                    if (jwtService.validateToken(token, userDetails)) {
+//                        UsernamePasswordAuthenticationToken authenticationToken =
+//                                new UsernamePasswordAuthenticationToken(userDetails, "JWT", userDetails.getAuthorities());
+//
+//                        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//                        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+//                    }
+//                } catch (Exception e) {
+//                    // Log but continue filter chain without setting authentication
+//                    log.warn("Authentication attempt failed: {}", e.getMessage());
+//                }
+//            }
+//
+//            // Continue filter chain regardless of authentication result
+//            filterChain.doFilter(request, response);
+//
+//        } catch (Exception e) {
+//            // Log the exception but don't interrupt the filter chain
+//            log.error("Exception in JWT filter:", e);
+//            filterChain.doFilter(request, response);
+//        }
+//    }
 }

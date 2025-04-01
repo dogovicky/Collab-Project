@@ -1,77 +1,60 @@
 package com.capricon.Collab_Project.service;
 
-import com.capricon.Collab_Project.dto.AuthResponse;
+import com.capricon.Collab_Project.dto.ApiResponse;
 import com.capricon.Collab_Project.dto.LoginRequest;
-import com.capricon.Collab_Project.exception.BaseException;
-import com.capricon.Collab_Project.exception.BusinessException;
 import com.capricon.Collab_Project.exception.UserException;
-import com.capricon.Collab_Project.exception.ValidationException;
 import com.capricon.Collab_Project.model.User;
 import com.capricon.Collab_Project.repository.UserRepo;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.rmi.ServerException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class LoginService {
 
     private final UserRepo userRepo;
     private final JwtService jwtService;
     private final AuthenticationManager authManager;
+    private final Executor executor;
 
-    public LoginService(UserRepo userRepo, JwtService jwtService, AuthenticationManager authManager) {
-        this.userRepo = userRepo;
-        this.jwtService = jwtService;
-        this.authManager = authManager;
-    }
-
-    public CompletableFuture<AuthResponse> loginUser(LoginRequest request) {
+    public CompletableFuture<ApiResponse<String>> loginUser(LoginRequest request) {
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                User user = userRepo.findByUsername(request.getUsername())
-                        .orElseThrow(() -> new UserException("User does not exist"));
+            User user = userRepo.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new UserException("User does not exist", HttpStatus.NOT_FOUND));
 
-                if (!user.getIsEnabled()) {
-                    throw new ValidationException("Account not yet verified");
-                }
-
-                Authentication auth = authManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(request.getUsername() , request.getPassword())
-                );
-
-                if (auth.isAuthenticated()) {
-                    String token = jwtService.generateToken(request.getUsername());
-
-                    return new AuthResponse("Login successful", token);
-                } else {
-                    throw new ValidationException("Authentication Failed");
-                }
-            } catch (BadCredentialsException ex) {
-                throw new ValidationException("Invalid username or password");
-            } catch (DisabledException ex) {
-                throw new UserException("Account is disabled");
+            if (!user.getIsEnabled()) {
+                throw new UserException("Account not yet verified", HttpStatus.UNAUTHORIZED);
             }
 
-        }).exceptionally(ex -> {
-            Throwable cause = ex.getCause();
-            log.error("Login failed {}: {}", request.getUsername(), ex.getMessage());
-            if (cause == null) {
-                throw new BaseException("Validation failed: " + ex.getMessage());
+            Authentication auth = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername() , request.getPassword())
+            );
+
+            if (auth.isAuthenticated()) {
+                String token = jwtService.generateToken(request.getUsername());
+                return ApiResponse.success(token, "Login successful");
+            } else {
+                throw new UserException("Authentication failed, please check username or password", HttpStatus.UNAUTHORIZED);
             }
-            throw (cause instanceof ValidationException
-                    || cause instanceof UserException
-                    || cause instanceof BusinessException)
-                    ? new CompletionException(cause)
-                    : new CompletionException(new ServerException("Account verification failed"));
+
+        }, executor).exceptionally(ex -> {
+            Throwable cause = (ex instanceof CompletionException) ? ex.getCause() : ex;
+            log.error("Error logging in user {}:", request.getUsername());
+            if (cause instanceof UserException userException) {
+                return ApiResponse.error(userException.getStatus(), userException.getMessage());
+            } else {
+                return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
+            }
         });
     }
 

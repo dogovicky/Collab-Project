@@ -3,10 +3,7 @@ package com.capricon.Collab_Project.service;
 import com.capricon.Collab_Project.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -59,7 +56,7 @@ public class MailService {
             log.info("Verification email sent to: {}",recipientEmail);
         } catch (Exception ex) {
             log.error("Failed to send verification email to {}: {}", recipientEmail, ex.getMessage());
-            throw new BusinessException("Failed to send verification email");
+            throw new BusinessException("Failed to send verification email", HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -73,7 +70,7 @@ public class MailService {
             sendEmailViaBravo(email, null, subject, htmlContent, textContent);
             log.info("Reset password link sent via email to {}", email);
         } catch (Exception ex) {
-            throw new BusinessException("Failed to send password reset email");
+            throw new BusinessException("Failed to send password reset email", HttpStatus.BAD_REQUEST);
         }
 
     }
@@ -200,7 +197,7 @@ public class MailService {
             );
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             log.error("Error sending email: {} - {}", ex.getStatusCode(), ex.getMessage());
-            throw new BusinessException("Failed to send email");
+            throw new BusinessException("Failed to send email", HttpStatus.BAD_REQUEST);
         }
 
     }

@@ -77,16 +77,16 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "connectedUserId") //Connections received by this user
     private List<Connection> connectionsReceived;
 
-    @OneToMany(mappedBy = "authorId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "authorId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes;
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Repost> reposts;
 
     @OneToMany(mappedBy = "senderId") //Messages sent by this user
@@ -101,7 +101,7 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "receiverId")
     private List<Notification> receivedNotifications; //Notifications the user has received
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "user")
     private List<Attachment> attachments;
 
 }

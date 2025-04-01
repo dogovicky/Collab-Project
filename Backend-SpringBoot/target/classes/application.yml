@@ -25,12 +25,27 @@ spring:
     password: UsrrZc_Z1dWw2zz03GwpSGrRPDtrlzhX
     virtual-host: slzjfjxx
 
+    # Configure rabbit mq exchanges, queues and routing keys
+    exchanges:
+      user: user.exchange
+      chat: chat.exchange
+      notification: notification.exchange
+    queues:
+      user: user.queue
+      recommendation: recommendation.queue
+      connection: connection.queue
+      event: event.queue
+    routingKeys:
+      user.signup.key: user.signup
+
 jwt:
   secret: av7Mp5zVtb3S467pWQ6A1MXRr0tBrqydU6+MeMfEQSw=
 
 
 logging:
   level:
+    web: DEBUG
+
     org:
       hibernate:
         SQL: DEBUG
@@ -53,3 +68,9 @@ app:
 
   verification:
     expiry-minutes: 15
+
+
+cloudinary:
+  cloud-name: dz3bxfeev
+  api-key: 478173146141297
+  api-secret: L1Dk5P_VnKOWqpiVB8hrIbczezs
