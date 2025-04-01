@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './NotificationPage.css';
+import socket from '../utils/socket'; // Import the WebSocket connection
 
 const Notification = ({ notification, onClick }) => (
   <div 
@@ -26,6 +27,20 @@ const NotificationPage = () => {
     };
 
     fetchNotifications();
+  }, []);
+
+  useEffect(() => {
+    const handleNewNotification = (payload) => {
+      console.log('Received notification:', payload);
+      setNotifications((prev) => [...prev, payload]);
+    };
+
+    // Listen for new notifications
+    socket.on('new_notification', handleNewNotification);
+
+    return () => {
+      socket.off('new_notification', handleNewNotification); // Cleanup listener
+    };
   }, []);
 
   const markAllAsRead = () => {
