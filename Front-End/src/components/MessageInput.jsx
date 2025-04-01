@@ -1,30 +1,32 @@
-import React, { useState } from 'react';
-import MessageList from '../components/MessageList';
-import socket from '../utils/socket';
+import React from 'react';
+import './MessageInput.css';
 
-const MessageInput = ({ userId, users }) => {
-  const [messages, setMessages] = useState([]);
-
-  // Handle message sending
-  const handleSendMessage = (content) => {
-    const newMessage = {
-      _id: Date.now().toString(),
-      senderId: userId,
-      content,
-      timestamp: new Date().toISOString(),
-    };
-
-    // Emit message to the server
-    socket.emit('sendMessage', newMessage);
-
-    // Update state
-    setMessages((prev) => [...prev, newMessage]);
-  };
-
+const MessageInput = ({ userId, users, onSend }) => {
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-      <MessageList messages={messages} userId={userId} users={users} />
-      <MessageInput onSend={handleSendMessage} />
+    <div className="message-input">
+      <input
+        type="text"
+        className="message-input__field"
+        placeholder="Type a message..."
+        onKeyPress={(e) => {
+          if (e.key === 'Enter' && e.target.value.trim()) {
+            onSend(e.target.value.trim());
+            e.target.value = '';
+          }
+        }}
+      />
+      <button
+        className="message-input__button"
+        onClick={() => {
+          const input = document.querySelector('input[type="text"]');
+          if (input.value.trim()) {
+            onSend(input.value.trim());
+            input.value = '';
+          }
+        }}
+      >
+        Send
+      </button>
     </div>
   );
 };

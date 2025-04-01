@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './CssSheets/ForgotPassword.css';
+import { requestResetCode, updatePassword } from "../../../api/auth"; // Corrected import path
 
 const ForgotPassword = () => {
   const [step, setStep] = useState(1);
@@ -139,15 +140,21 @@ const ForgotPassword = () => {
 };
 
 const sendResetCode = async (data) => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve({ success: true }), 1000);
-  });
+  try {
+    const response = await requestResetCode(data); // Call API
+    return response;
+  } catch (error) {
+    throw new Error(error.message || "Failed to send reset code.");
+  }
 };
 
 const resetPassword = async (data) => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve({ success: true }), 1000);
-  });
+  try {
+    const response = await updatePassword(data); // Call API
+    return response;
+  } catch (error) {
+    throw new Error(error.message || "Failed to reset password.");
+  }
 };
 
 export default ForgotPassword;

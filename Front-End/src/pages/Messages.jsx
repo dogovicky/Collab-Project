@@ -1,36 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MessageList from '../components/MessageList';
 import MessageInput from '../components/MessageInput';
-//import socket from '../utils/socket';
+import socket from '../utils/socket'; // Ensure this points to the updated socket.js
+import './CssSheets/Messages.css';
 
 const Messages = ({ userId, users }) => {
   const [messages, setMessages] = useState([]);
+  const channelRef = useRef(null);
 
-  // Listen for incoming messages
   useEffect(() => {
-    // Listen for incoming messages from the server
-    socket.on('receiveMessage', (message) => {
-      setMessages((prev) => [...prev, message]);
-    });
+    console.log('Messages component mounted');
 
-    // Cleanup to prevent memory leaks
-    return () => {
-      socket.off('receiveMessage');
+    // Join the Phoenix channel
+    const channel = socket.channel('room:lobby', { user_id: userId });
+    channelRef.current = channel;
+    channel
+      .join()
+      .receive('ok', () => console.log('Joined channel successfully'))
+      .receive('error', (resp) => console.error('Unable to join channel', resp));
+
+    // Listen for incoming messages
+    const handleNewMessage = (payload) => {
+      console.log('Received message:', payload);
+      setMessages((prev) => [...prev, payload]);
     };
-  }, []);
+
+    channel.on('new_message', handleNewMessage);
+
+    return () => {
+      console.log('Messages component unmounted');
+      channel.leave();
+    };
+  }, [userId]);
 
   // Handle sending a message
   const handleSendMessage = (content) => {
-    if (content.trim() && socket.connected) { // Check if socket is connected
+    if (content.trim()) {
       const newMessage = {
-        _id: Date.now().toString(), // Temporary ID before saving to DB
+        _id: Date.now().toString(),
         senderId: userId,
         content,
         timestamp: new Date().toISOString(),
       };
 
-      // Emit message to server
-      socket.emit('sendMessage', newMessage);
+      console.log('Sending message:', newMessage);
+      channelRef.current.push('send_message', newMessage);
 
       // Update local state immediately for faster UX
       setMessages((prev) => [...prev, newMessage]);
@@ -38,16 +52,19 @@ const Messages = ({ userId, users }) => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="messages">
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="messages__list">
         <MessageList messages={messages} userId={userId} users={users} />
       </div>
 
       {/* Message input */}
-      <MessageInput onSend={handleSendMessage} />
+      <div className="messages__input">
+        <MessageInput onSend={handleSendMessage} userId={userId} users={users} />
+      </div>
     </div>
   );
 };
 
 export default Messages;
+

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-//import classNames from 'classnames'; // Ensure this import is correct
-
+import socket from '../utils/socket'; // Ensure this points to the updated socket.js
+import './MessageList.css'; 
 const MessageList = ({ messages, userId, users }) => {
   const messagesEndRef = useRef(null);
 
@@ -10,9 +10,12 @@ const MessageList = ({ messages, userId, users }) => {
   }, [messages]);
 
   // Function to get user info (name, avatar)
-  const getUserInfo = useCallback((id) => {
-    return users.find((user) => user._id === id) || {};
-  }, [users]);
+  const getUserInfo = useCallback(
+    (id) => {
+      return users.find((user) => user._id === id) || {};
+    },
+    [users]
+  );
 
   return (
     <div className="flex flex-col gap-2 p-4 h-[500px] overflow-y-auto bg-gray-100 rounded-lg shadow-inner">
@@ -23,7 +26,9 @@ const MessageList = ({ messages, userId, users }) => {
         return (
           <div
             key={msg._id}
-            className={`flex items-end gap-2 ${isSentByCurrentUser ? 'justify-end' : 'justify-start'}`}
+            className={`flex items-end gap-2 ${
+              isSentByCurrentUser ? 'justify-end' : 'justify-start'
+            }`}
           >
             {/* Show avatar only for received messages */}
             {!isSentByCurrentUser && (
@@ -34,7 +39,9 @@ const MessageList = ({ messages, userId, users }) => {
               />
             )}
             <div
-              className={`max-w-[70%] p-2 rounded-xl text-white ${isSentByCurrentUser ? 'bg-blue-500' : 'bg-gray-500'}`}
+              className={`max-w-[70%] p-2 rounded-xl text-white ${
+                isSentByCurrentUser ? 'bg-blue-500' : 'bg-gray-500'
+              }`}
             >
               {/* Display username */}
               {!isSentByCurrentUser && (
