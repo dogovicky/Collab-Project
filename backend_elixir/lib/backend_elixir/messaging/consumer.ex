@@ -3,7 +3,9 @@ defmodule BackendElixir.Messaging.Consumer do
   require Logger
   alias BackendElixirWeb.Endpoint
 
-  @queue "notifications"
+  @queue "notifications.queue"
+  @exchange "notifications.exchange"
+  @routing_key "notifications.key"
 
   # Start the Consumer when the app starts
   def start_link(opts \\ []) do
@@ -47,16 +49,35 @@ defmodule BackendElixir.Messaging.Consumer do
       {:ok, conn} ->
         case AMQP.Channel.open(conn) do
           {:ok, chan} ->
+            # Declare exchange
+            case AMQP.Exchange.declare(chan, @exchange, :direct, durable: true) do
+              :ok ->
+                Logger.info("RabbitMQ exchange '#{@exchange}' declared successfully.")
+
+              {:error, reason} ->
+                Logger.error("Failed to declare RabbitMQ exchange: #{inspect(reason)}")
+                {:stop, reason}
+            end
+
             # Declare queue with additional options
-            case AMQP.Queue.declare(chan, @queue,
-                   durable: true,
-                   auto_delete: false
-                 ) do
+            case AMQP.Queue.declare(chan, @queue, durable: true, auto_delete: false) do
               {:ok, _} ->
                 Logger.info("RabbitMQ queue '#{@queue}' declared successfully.")
 
               {:error, reason} ->
                 Logger.error("Failed to declare RabbitMQ queue: #{inspect(reason)}")
+                {:stop, reason}
+            end
+
+            # Bind queue to exchange with routing key
+            case AMQP.Queue.bind(chan, @queue, @exchange, routing_key: @routing_key) do
+              :ok ->
+                Logger.info(
+                  "RabbitMQ queue '#{@queue}' bound to exchange '#{@exchange}' with routing key '#{@routing_key}'."
+                )
+
+              {:error, reason} ->
+                Logger.error("Failed to bind queue: #{inspect(reason)}")
                 {:stop, reason}
             end
 
@@ -135,22 +156,33 @@ defmodule BackendElixir.Messaging.Consumer do
   end
 
   # Handle Incoming Messages from RabbitMQ
+
   def handle_info({:basic_deliver, payload, meta}, state) do
     Logger.info("Received message: #{payload}")
 
+    # Decode the JSON payload
     case Jason.decode(payload) do
-      {:ok, %{"user_id" => user_id, "message" => message}} ->
+      {:ok, %{"username" => user_id, "fullName" => message}} ->
+        # Broadcast the notification to the frontend via WebSocket
         Endpoint.broadcast!("notifications:#{user_id}", "new_notification", %{
           user_id: user_id,
           message: message
         })
 
-        Logger.info("Sent notification to WebSocket: #{message}")
-        # Manually acknowledge the message
+        Logger.info("Sent notification to WebSocket for user #{user_id}: #{message}")
+
+        # Acknowledge the message
         AMQP.Basic.ack(state.channel, meta.delivery_tag)
 
-      {:error, _} ->
+      {:ok, decoded_payload} ->
+        Logger.error("Unexpected payload structure: #{inspect(decoded_payload)}")
+
+        # Reject the message and do not requeue
+        AMQP.Basic.reject(state.channel, meta.delivery_tag, requeue: false)
+
+      {:error, _reason} ->
         Logger.error("Failed to decode JSON message: #{payload}")
+
         # Reject the message and do not requeue
         AMQP.Basic.reject(state.channel, meta.delivery_tag, requeue: false)
     end

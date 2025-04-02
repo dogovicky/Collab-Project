@@ -22,7 +22,7 @@ defmodule BackendElixirWeb.Endpoint do
     longpoll: [connect_info: [session: @session_options]]
 
   # Allow CORS (React frontend running on another machine)
-  plug CORSPlug, origin: ["http://10.100.145.10:3000"]
+  plug CORSPlug, origin: ["http://10.100.145.10:5173"]
 
   # Serve at "/" the static files from "priv/static" directory.
   #

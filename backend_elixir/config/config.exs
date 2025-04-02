@@ -8,6 +8,7 @@ config :backend_elixir, BackendElixir.Repo, ssl: false
 
 config :backend_elixir, BackendElixirWeb.Endpoint,
   pubsub_server: BackendElixir.PubSub,
+  url: [host: "192.168.155.172", port: 4000],
   # Allows external connections
   http: [ip: {0, 0, 0, 0}, port: 4000],
   # Allows frontend requests from any domain (useful for local development)
