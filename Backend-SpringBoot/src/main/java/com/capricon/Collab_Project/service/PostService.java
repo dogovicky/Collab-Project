@@ -1,8 +1,6 @@
 package com.capricon.Collab_Project.service;
 
-import com.capricon.Collab_Project.dto.ApiResponse;
-import com.capricon.Collab_Project.dto.DeletePostDTO;
-import com.capricon.Collab_Project.dto.EventDTO;
+import com.capricon.Collab_Project.dto.*;
 import com.capricon.Collab_Project.exception.BusinessException;
 import com.capricon.Collab_Project.exception.UserException;
 import com.capricon.Collab_Project.model.Attachment;
@@ -32,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,52 +42,49 @@ public class PostService {
     private final CloudinaryService cloudinaryService;
     private final AttachmentRepo attachmentRepo;
     private final PostRepo postRepo;
-    private final Executor executor;
 
-    // Fetch a post for a specific user (plus comments, likes and reposts)
-    @Async
-    public CompletableFuture<ApiResponse<Post>> getPost(String username) {
-        return CompletableFuture.completedFuture(getPostByUsername(username))
-                .exceptionally(this::handlePostException);
+    public ApiResponse<PostDTO> getPostByUsername(String username) {
+        try {
+            // Ensure user account exists
+            User user = userRepo.findByUsername(username)
+                    .orElseThrow(() -> new UserException("User does not exists", HttpStatus.NOT_FOUND));
+
+            // Fetch post
+            Post post = postRepo.findPostByAuthorId(user)
+                    .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
+
+            return ApiResponse.success(convertToPostDTO(post), "Post fetched successfully");
+        } catch (Exception ex) {
+            return handlePostException(ex);
+        }
     }
 
-    public ApiResponse<Post> getPostByUsername(String username) {
-        // Ensure user account exists
-        User user = userRepo.findByUsername(username)
-                .orElseThrow(() -> new UserException("User does not exists", HttpStatus.NOT_FOUND));
-
-        // Fetch post
-        Post post = postRepo.findPostByAuthorId(user)
-                .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
-
-        return ApiResponse.success(post, "Post fetched successfully");
+    public ApiResponse<PostDTO> createEvent(EventDTO eventDTO) {
+        try {
+            return saveEvent(eventDTO);
+        } catch (Exception ex) {
+            return handlePostException(ex);
+        }
     }
 
-    @Async
-    public CompletableFuture<ApiResponse<Post>> createEvent(EventDTO eventDTO) {
-        return CompletableFuture.completedFuture(saveEvent(eventDTO))
-                .exceptionally(this::handlePostException);
-    }
-
-    @Async
-    public CompletableFuture<AttachmentType> getFileType(MultipartFile file) {
+    public AttachmentType getFileType(MultipartFile file) {
         String contentType = file.getContentType();
 
         List<String> imageTypes = Arrays.asList("image/png", "image/jpg", "image/jpeg", "image/gif");
         List<String> videoTypes = Arrays.asList("video/mp4", "video/mpeg", "video/quicktime");
 
         if (imageTypes.contains(contentType)) {
-            return CompletableFuture.completedFuture(AttachmentType.IMAGE);
+            return AttachmentType.IMAGE;
         } else if (videoTypes.contains(contentType)) {
-            return CompletableFuture.completedFuture(AttachmentType.VIDEO);
+            return AttachmentType.VIDEO;
         } else {
-            return CompletableFuture.failedFuture(new IllegalArgumentException("Unsupported file format"));
+            throw new IllegalArgumentException("Unsupported file format");
         }
     }
 
 
     @Transactional
-    public ApiResponse<Post> saveEvent(EventDTO eventDTO){
+    public ApiResponse<PostDTO> saveEvent(EventDTO eventDTO){
 
         // Find user
         User user = userRepo.findByUsername(eventDTO.getUsername())
@@ -115,11 +111,10 @@ public class PostService {
         List<Attachment> attachments = new ArrayList<>();
         if (eventDTO.getAttachments() != null) {
             for (MultipartFile file : eventDTO.getAttachments()) {
-                CompletableFuture<AttachmentType> fileTypeFuture = getFileType(file);
+                AttachmentType fileType = getFileType(file);
                 String file_url = cloudinaryService.uploadFile(file);
 
                 try {
-                    AttachmentType fileType = fileTypeFuture.get();
                     Attachment attachment = Attachment.builder()
                             .user(user)
                             .post(post)
@@ -128,8 +123,8 @@ public class PostService {
                             .build();
 
                     attachments.add(attachment);
-                } catch (ExecutionException | InterruptedException e) {
-                    throw new RuntimeException(e);
+                } catch (Exception ex) {
+                    throw new BusinessException(ex.getMessage(), HttpStatus.BAD_REQUEST);
                 }
             }
         }
@@ -138,29 +133,28 @@ public class PostService {
             attachmentRepo.saveAll(attachments);
             post.setAttachments(attachments);
         }
-        return ApiResponse.success(post, "Post saved successfully");
+        PostDTO postDTO = convertToPostDTO(post);
+        return ApiResponse.success(postDTO, "Post saved successfully");
     }
 
-    // Delete a particular post
-    @Async
-    public CompletableFuture<ApiResponse<Object>> deletePost(DeletePostDTO deletePostDTO) {
-        return CompletableFuture.completedFuture(delete(deletePostDTO))
-                .exceptionally(this::handlePostException);
-    }
 
     @Transactional
     public ApiResponse<Object> delete(DeletePostDTO deletePostDTO) {
-        // Find if user exists post
-        User user = userRepo.findByUsername(deletePostDTO.getUsername())
-                .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
+        try {
+            // Find if user exists post
+            User user = userRepo.findByUsername(deletePostDTO.getUsername())
+                    .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
 
-        // Find if user owns post
-        Post post = postRepo.findByAuthorIdAndId(user, deletePostDTO.getPostId())
-                .orElseThrow(() -> new BusinessException("Can't delete post you don't own", HttpStatus.CONFLICT));
+            // Find if user owns post
+            Post post = postRepo.findByAuthorIdAndId(user, deletePostDTO.getPostId())
+                    .orElseThrow(() -> new BusinessException("Can't delete post you don't own", HttpStatus.CONFLICT));
 
-        // Delete post
-        postRepo.delete(post);
-        return ApiResponse.success(null, "Post successfully deleted");
+            // Delete post
+            postRepo.delete(post);
+            return ApiResponse.success(null, "Post successfully deleted");
+        } catch (Exception ex) {
+            return handlePostException(ex);
+        }
     }
 
     public <T> ApiResponse<T> handlePostException(Throwable ex) {
@@ -176,6 +170,44 @@ public class PostService {
         } else {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
         }
+    }
+
+
+    private PostDTO convertToPostDTO(Post post) {
+        PostDTO postDTO = PostDTO.builder()
+                .id(post.getId())
+                .content(post.getContent())
+                .label(post.getLabel())
+                .timestamp(post.getCreatedAt())
+                .likeCount(post.getLikeCount())
+                .repostCount(post.getRepostCount())
+                .commentCount(post.getCommentCount())
+                .build();
+
+        // Map author
+        UserDTO userDTO = UserDTO.builder()
+                .username(post.getAuthorId().getUsername())
+                .fullName(post.getAuthorId().getFullName())
+                .email(post.getAuthorId().getEmail())
+                .build();
+
+        postDTO.setAuthor(userDTO);
+
+        //Map attachments
+        if (post.getAttachments() != null) {
+            List<AttachmentDTO> attachmentDTOs = post.getAttachments().stream()
+                    .map(attachment -> {
+                        AttachmentDTO attachmentDTO = new AttachmentDTO();
+                        attachmentDTO.setId(attachment.getAttachmentId());
+                        attachmentDTO.setFileUrl(attachment.getFileUrl());
+                        attachmentDTO.setAttachmentType(attachment.getFileType());
+                        return attachmentDTO;
+                    })
+                    .toList();
+            postDTO.setAttachments(attachmentDTOs);
+        }
+
+        return postDTO;
     }
 
 }

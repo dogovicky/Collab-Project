@@ -23,45 +23,46 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/comment")
-    public CompletableFuture<ResponseEntity<ApiResponse<Comment>>> comment(@Valid @RequestBody CommentDTO commentDTO) {
+    public ResponseEntity<ApiResponse<CommentDTO>> comment(@Valid @RequestBody CommentDTO commentDTO) {
         log.info("Commenting on post {} by user {}", commentDTO.getPostId(), commentDTO.getUsername());
-        return commentService.commentPost(commentDTO)
-                .thenApply(commentApiResponse -> {
-                    if (commentApiResponse.isSuccess()) {
-                        log.info("Successfully commented on post {} by user {}", commentDTO.getPostId(), commentDTO.getUsername());
-                        return ResponseEntity.ok(commentApiResponse);
-                    } else {
-                        log.error("Failed to comment on post {} by user {}", commentDTO.getPostId(), commentDTO.getUsername());
-                        return ResponseEntity.status(commentApiResponse.getStatus()).body(commentApiResponse);
-                    }
-                }).exceptionally(ex -> {
-                    Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
-
-                    log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error"));
-                });
-    }
-
-
-    @PatchMapping("/comment")
-    public CompletableFuture<ResponseEntity<ApiResponse<Object>>> delete(@Valid @RequestBody CommentDTO commentDTO) {
-        log.info("Deleting comment for post {} by user {}", commentDTO.getPostId(), commentDTO.getUsername());
-        return commentService.deleteComment(commentDTO).thenApply(deleteResponse -> {
-            if (deleteResponse.isSuccess()) {
-                log.info("Successfully deleted comment");
-                return ResponseEntity.ok(deleteResponse);
+        try {
+            ApiResponse<CommentDTO> response = commentService.comment(commentDTO);
+            if (response.isSuccess()) {
+                log.info("Successfully commented on post {} by user {}", commentDTO.getPostId(), commentDTO.getUsername());
+                return ResponseEntity.ok(response);
             } else {
-                log.error("Failed to delete comment: {}", deleteResponse.getMessage());
-                return ResponseEntity.status(deleteResponse.getStatus()).body(deleteResponse);
+                log.error("Failed to comment on post {} by user {}", commentDTO.getPostId(), commentDTO.getUsername());
+                return ResponseEntity.status(response.getStatus()).body(response);
             }
-        }).exceptionally(ex -> {
+        } catch (Exception ex) {
             Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
 
             log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error"));
-        });
+        }
+    }
+
+
+    @PatchMapping("/comment")
+    public ResponseEntity<ApiResponse<Object>> delete(@Valid @RequestBody CommentDTO commentDTO) {
+        log.info("Deleting comment for post {} by user {}", commentDTO.getPostId(), commentDTO.getUsername());
+        try {
+            ApiResponse<Object> response = commentService.delete(commentDTO);
+            if (response.isSuccess()) {
+                log.info("Successfully deleted comment");
+                return ResponseEntity.ok(response);
+            } else {
+                log.error("Failed to delete comment: {}", response.getMessage());
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        } catch (Exception ex) {
+            Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
+
+            log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error"));
+        }
     }
 
 }

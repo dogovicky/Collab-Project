@@ -37,11 +37,6 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    @PostConstruct
-    public void initSecurityContext() {
-        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
-    }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
@@ -61,7 +56,6 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilter(new WebAsyncManagerIntegrationFilter())
                 .build();
     }
 

@@ -1,7 +1,7 @@
 package com.capricon.Collab_Project.service;
 
 import com.capricon.Collab_Project.dto.ApiResponse;
-import com.capricon.Collab_Project.dto.UserDTO;
+import com.capricon.Collab_Project.dto.SignUpRequest;
 import com.capricon.Collab_Project.dto.ValidationRequest;
 import com.capricon.Collab_Project.exception.BusinessException;
 import com.capricon.Collab_Project.exception.UserException;
@@ -42,14 +42,14 @@ public class SignUpService {
     private final RabbitMQPublisher publisher;
     private final TransactionTemplate transactionTemplate;
 
-    private void validateRequest(UserDTO request) {
-        Set<ConstraintViolation<UserDTO>> violations = validator.validate(request);
+    private void validateRequest(SignUpRequest request) {
+        Set<ConstraintViolation<SignUpRequest>> violations = validator.validate(request);
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
     }
 
-    public CompletableFuture<ApiResponse<String>> signUp(UserDTO request) {
+    public CompletableFuture<ApiResponse<String>> signUp(SignUpRequest request) {
         return CompletableFuture.supplyAsync(() -> {
             validateRequest(request);
             ApiResponse<String> message = transactionTemplate.execute(status -> signUpRequest(request));
@@ -73,7 +73,7 @@ public class SignUpService {
 
 
     @Transactional
-    private ApiResponse<String> signUpRequest(UserDTO request) {
+    private ApiResponse<String> signUpRequest(SignUpRequest request) {
         Optional<User> existingUser = userRepo.findByUsernameOrEmail(request.getUsername(), request.getEmail());
         if (existingUser.isPresent()) {
             throw new UserException("User already exists", HttpStatus.CONFLICT);

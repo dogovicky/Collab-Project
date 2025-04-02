@@ -1,7 +1,7 @@
 package com.capricon.Collab_Project.service;
 
 import com.capricon.Collab_Project.components.RabbitMQProperties;
-import com.capricon.Collab_Project.dto.UserDTO;
+import com.capricon.Collab_Project.dto.SignUpRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,14 +34,14 @@ public class EventPublisherTest {
 
     @Test
     void testPublishUserSignUpEvent() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setFullName("John Doe");
-        userDTO.setEmail("johndoe@example.com");
-        userDTO.setUsername("@johndoe");
+        SignUpRequest signUpRequest = new SignUpRequest();
+        signUpRequest.setFullName("John Doe");
+        signUpRequest.setEmail("johndoe@example.com");
+        signUpRequest.setUsername("@johndoe");
 
-        mqPublisher.sendMessage("user", "user.signup", userDTO);
+        mqPublisher.sendMessage("user", "user.signup", signUpRequest);
 
-        verify(rabbitTemplate, times(1)).convertAndSend("user.exchange", "user.signup.key", userDTO);
+        verify(rabbitTemplate, times(1)).convertAndSend("user.exchange", "user.signup.key", signUpRequest);
 
     }
 

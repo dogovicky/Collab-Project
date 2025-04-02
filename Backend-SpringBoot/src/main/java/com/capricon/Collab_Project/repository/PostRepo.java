@@ -16,6 +16,9 @@ import java.util.UUID;
 @Repository
 public interface PostRepo extends JpaRepository<Post, UUID> {
 
+    @Query(value = "SELECT * FROM posts WHERE id = :id", nativeQuery = true)
+    Optional<Post> findByIdNative(@Param("id") UUID id);
+
     @Modifying
     @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :postId")
     void incrementLikeCount(@Param("postId") UUID postId);

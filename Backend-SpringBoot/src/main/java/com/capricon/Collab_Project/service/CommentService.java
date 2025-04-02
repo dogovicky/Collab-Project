@@ -19,6 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
@@ -31,72 +32,65 @@ public class CommentService {
     private final CommentRepo commentRepo;
     private final UserRepo userRepo;
     private final PostRepo postRepo;
-    private final Executor executor;
 
 
-    @Async
-    public CompletableFuture<ApiResponse<Comment>> commentPost(CommentDTO commentDTO) {
-        log.info("Calling comment method asynchronously");
-        return CompletableFuture.completedFuture(comment(commentDTO))
-                .exceptionally(this::handleCommentException);
-    }
+    @Transactional(timeout = 10)
+    public ApiResponse<CommentDTO> comment(CommentDTO commentDTO) {
+        try {
+            // Ensure user is valid
+            User user = userRepo.findByUsername(commentDTO.getUsername())
+                    .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
 
-    @Async
-    public CompletableFuture<ApiResponse<Object>> deleteComment(CommentDTO commentDTO) {
-        log.info("Calling delete comment method");
-//        return CompletableFuture.supplyAsync(() -> delete(commentDTO))
-//                .exceptionally(this::handleCommentException);
-        return CompletableFuture.completedFuture(delete(commentDTO))
-                .exceptionally(this::handleCommentException);
-    }
+            // Ensure post exists
+            UUID postId = UUID.fromString(commentDTO.getPostId());
+            log.info("Post id is {}", postId);
+            Post post = postRepo.findByIdNative(postId)
+                    .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
 
-    @Transactional
-    public ApiResponse<Comment> comment(CommentDTO commentDTO) {
-        // Ensure user is valid
-        User user = userRepo.findByUsername(commentDTO.getUsername())
-                .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
+            // Check if user has already commented
+            if (commentRepo.existsByUserAndPost(user, post)) {
+                throw new BusinessException("User already commented on this post", HttpStatus.CONFLICT);
+            }
 
-        // Ensure post exists
-        Post post = postRepo.findById(commentDTO.getPostId())
-                .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
+            // Build and save comment
+            Comment comment = Comment.builder()
+                    .post(post)
+                    .user(user)
+                    .commentText(commentDTO.getCommentText())
+                    .build();
+            commentRepo.save(comment);
 
-        // Check if user has already commented
-        if (commentRepo.existsByUserAndPost(user, post)) {
-            throw new BusinessException("User already commented on this post", HttpStatus.CONFLICT);
+            // Update comment count in post
+            postRepo.incrementCommentCount(post.getId());
+
+            return ApiResponse.success(buildCommentResponse(comment), "Comment successful");
+        } catch (Exception ex) {
+            return handleCommentException(ex);
         }
-
-        // Build and save comment
-        Comment comment = Comment.builder()
-                .post(post)
-                .user(user)
-                .commentText(commentDTO.getCommentText())
-                .build();
-        commentRepo.save(comment);
-
-        // Update comment count in post
-        postRepo.incrementLikeCount(post.getId());
-
-        return ApiResponse.success(comment, "Comment successful");
     }
 
-    @Transactional
+    @Transactional(timeout = 10)
     public ApiResponse<Object> delete(CommentDTO commentDTO) {
-        // Find user
-        User user = userRepo.findByUsername(commentDTO.getUsername())
-                .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
+        try {
+            // Find user
+            User user = userRepo.findByUsername(commentDTO.getUsername())
+                    .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
 
-        // Find post
-        Post post = postRepo.findById(commentDTO.getPostId())
-                .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
+            // Find post
+            Post post = postRepo.findByIdNative(UUID.fromString(commentDTO.getPostId()))
+                    .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
 
-        // Find if comment exists
-        Comment comment = commentRepo.findByUserAndPost(user, post)
-                .orElseThrow(() -> new BusinessException("Comment not found", HttpStatus.BAD_REQUEST));
-        commentRepo.delete(comment);
+            // Find if comment exists
+            Comment comment = commentRepo.findByUserAndPost(user, post)
+                    .orElseThrow(() -> new BusinessException("Comment not found", HttpStatus.BAD_REQUEST));
+            commentRepo.delete(comment);
 
-        // Update comment count in post
-        postRepo.decrementCommentCount(post.getId());
-        return ApiResponse.success(null, "Comment deleted successfully");
+            // Update comment count in post
+            postRepo.decrementCommentCount(post.getId());
+            return ApiResponse.success(null, "Comment deleted successfully");
+        } catch (Exception ex) {
+            return handleCommentException(ex);
+        }
     }
 
     private <T> ApiResponse<T> handleCommentException(Throwable ex) {
@@ -112,6 +106,14 @@ public class CommentService {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
         }
 
+    }
+
+    private CommentDTO buildCommentResponse(Comment comment) {
+        return CommentDTO.builder()
+                .postId(comment.getPost().getId().toString())
+                .commentText(comment.getCommentText())
+                .username(comment.getUser().getUsername())
+                .build();
     }
 
 }

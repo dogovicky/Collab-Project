@@ -23,50 +23,52 @@ public class RepostController {
     private final RepostService repostService;
 
     @PostMapping("/repost")
-    public CompletableFuture<ResponseEntity<ApiResponse<Repost>>> repost(@Valid @RequestBody RepostDTO repostDTO) {
+    public ResponseEntity<ApiResponse<RepostDTO>> repost(@Valid @RequestBody RepostDTO repostDTO) {
         log.info("Repost request sent for post {} by user {}", repostDTO.getPostId(), repostDTO.getUsername());
-        return repostService.repost(repostDTO)
-                .thenApply(response -> {
-                    if (response.isSuccess()) {
-                        log.info("Successfully reposted post {}", repostDTO.getPostId());
-                        return ResponseEntity.ok(response);
-                    } else {
-                        log.error("An error occurred while reposting post {}: {}",
-                                repostDTO.getPostId(), response.getMessage());
-                        return ResponseEntity.status(response.getStatus()).body(response);
-                    }
-                }).exceptionally(ex -> {
-                    Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
+        try {
+            ApiResponse<RepostDTO> response = repostService.saveRepost(repostDTO);
+            if (response.isSuccess()) {
+                log.info("Successfully reposted post {}", repostDTO.getPostId());
+                return ResponseEntity.ok(response);
+            } else {
+                log.error("An error occurred while reposting post {}: {}",
+                        repostDTO.getPostId(), response.getMessage());
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        } catch (Exception ex) {
+            Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
 
-                    log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR,
-                                    (cause != null) ? cause.getMessage() : "Unknown error"));
-                });
+            log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR,
+                            (cause != null) ? cause.getMessage() : "Unknown error"));
+        }
     }
 
 
     @PatchMapping("/repost")
-    public CompletableFuture<ResponseEntity<ApiResponse<Object>>> deleteRepost(@Valid @RequestBody RepostDTO repostDTO) {
+    public ResponseEntity<ApiResponse<Object>> deleteRepost(@Valid @RequestBody RepostDTO repostDTO) {
         log.info("Delete repost request sent for post {} by user {}", repostDTO.getPostId(), repostDTO.getUsername());
-        return repostService.deletePost(repostDTO)
-                .thenApply(response -> {
-                    if (response.isSuccess()) {
-                        log.info("Post successfully deleted");
-                        return ResponseEntity.ok(response);
-                    } else {
-                        log.error("Error deleting post: {}", response.getMessage());
-                        return ResponseEntity.status(response.getStatus()).body(response);
-                    }
-                }).exceptionally(ex -> {
-                    Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
+        try {
+            ApiResponse<Object> response = repostService.deleteRepost(repostDTO);
+            if (response.isSuccess()) {
+                log.info("Successfully deleted repost for post {}", repostDTO.getPostId());
+                return ResponseEntity.ok(response);
+            } else {
+                log.error("An error occurred while deleting repost for post {}: {}",
+                        repostDTO.getPostId(), response.getMessage());
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        } catch (Exception ex) {
+            Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
 
-                    log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
+            log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
 
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR,
-                                    (cause != null) ? cause.getMessage() : "Unknown error"));
-                });
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR,
+                            (cause != null) ? cause.getMessage() : "Unknown error"));
+        }
+
     }
 
 }

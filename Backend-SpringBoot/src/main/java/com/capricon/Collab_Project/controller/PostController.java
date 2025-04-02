@@ -3,6 +3,7 @@ package com.capricon.Collab_Project.controller;
 import com.capricon.Collab_Project.dto.ApiResponse;
 import com.capricon.Collab_Project.dto.DeletePostDTO;
 import com.capricon.Collab_Project.dto.EventDTO;
+import com.capricon.Collab_Project.dto.PostDTO;
 import com.capricon.Collab_Project.model.Post;
 import com.capricon.Collab_Project.service.PostService;
 import jakarta.validation.Valid;
@@ -24,53 +25,56 @@ public class PostController {
 
     private final PostService postService;
 
-    @GetMapping("/post/{username}")
-    public CompletableFuture<ResponseEntity<ApiResponse<Post>>> getPost(@PathVariable String username) {
+    @GetMapping("/post/{id}")
+    public ResponseEntity<ApiResponse<PostDTO>> getPost(@PathVariable String username) {
         log.info("Fetching post for user: {}", username);
-        return postService.getPost(username)
-                .thenApply(post -> {
-                    if (post.isSuccess()) {
-                        log.info("Post fetched successfully for user: {}", username);
-                        return ResponseEntity.ok(post);
-                    } else {
-                        log.error("Error fetching post for user {}", username);
-                        return ResponseEntity.status(post.getStatus()).body(post);
-                    }
-                })
-                .exceptionally(this::handlePostControllerException);
+        try {
+            ApiResponse<PostDTO> post = postService.getPostByUsername(username);
+            if (post.isSuccess()) {
+                log.info("Post fetched successfully for user: {}", username);
+                return ResponseEntity.ok(post);
+            } else {
+                log.error("Error fetching post for user {}", username);
+                return ResponseEntity.status(post.getStatus()).body(post);
+            }
+        } catch (Exception ex) {
+            return handlePostControllerException(ex);
+        }
     }
 
     @PostMapping("/create-post")
-    public CompletableFuture<ResponseEntity<ApiResponse<Post>>> savePost(@RequestBody @Valid EventDTO eventDTO) {
+    public ResponseEntity<ApiResponse<PostDTO>> savePost(@RequestBody @Valid EventDTO eventDTO) {
         log.info("Creating post event");
-        //User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return postService.createEvent(eventDTO)
-                .thenApply(post -> {
-                    if (post.isSuccess()) {
-                        log.info("Post created successfully by user {}", eventDTO.getUsername());
-                        return ResponseEntity.ok(post);
-                    } else {
-                        log.error("Error saving post, {}", post.getMessage());
-                        return ResponseEntity.status(post.getStatus()).body(post);
-                    }
-                })
-                .orTimeout(30, TimeUnit.SECONDS)
-                .exceptionally(this::handlePostControllerException);
+        try {
+            ApiResponse<PostDTO> response = postService.createEvent(eventDTO);
+            if (response.isSuccess()) {
+                log.info("Post created successfully by user {}", eventDTO.getUsername());
+                return ResponseEntity.ok(response);
+            } else {
+                log.error("Error saving post, {}", response.getMessage());
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        } catch (Exception ex) {
+            return handlePostControllerException(ex);
+        }
+
     }
 
     @DeleteMapping("/delete-post")
-    public CompletableFuture<ResponseEntity<ApiResponse<Object>>> deletePost(@Valid @RequestBody DeletePostDTO deletePostDTO) {
+    public ResponseEntity<ApiResponse<Object>> deletePost(@Valid @RequestBody DeletePostDTO deletePostDTO) {
         log.info("Delete post request made for post {} by user {}", deletePostDTO.getPostId(), deletePostDTO.getUsername());
-        return postService.deletePost(deletePostDTO)
-                .thenApply(response -> {
-                    if (response.isSuccess()) {
-                        log.info("Post successfully deleted");
-                        return ResponseEntity.ok(response);
-                    } else {
-                        log.error("Error deleting post");
-                        return ResponseEntity.status(response.getStatus()).body(response);
-                    }
-                }).exceptionally(this::handlePostControllerException);
+        try {
+            ApiResponse<Object> response = postService.delete(deletePostDTO);
+            if (response.isSuccess()) {
+                log.info("Post successfully deleted");
+                return ResponseEntity.ok(response);
+            } else {
+                log.error("Error deleting post");
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        } catch (Exception ex) {
+            return handlePostControllerException(ex);
+        }
     }
 
     public <T> ResponseEntity<ApiResponse<T>> handlePostControllerException(Throwable ex) {

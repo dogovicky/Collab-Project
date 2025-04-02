@@ -32,71 +32,65 @@ public class LikeService {
     private final LikeRepo likeRepo;
     private final PostRepo postRepo;
     private final UserRepo userRepo;
-    private final Executor executor;
 
-
-    @Async
-    public CompletableFuture<ApiResponse<Like>> like(LikeDTO likeDTO) {
-        log.info("Calling like post method asynchronously");
-//        return CompletableFuture.supplyAsync(() -> likePost(likeDTO)).exceptionally(this::handleLikeException);
-        return CompletableFuture.completedFuture(likePost(likeDTO)).exceptionally(this::handleLikeException);
-    }
-
-    @Async
-    public CompletableFuture<ApiResponse<Object>> unlike(LikeDTO likeDTO) {
-        log.info("Calling unlike post method asynchronously");
-//        return CompletableFuture.supplyAsync(() -> unlikePost(likeDTO)).exceptionally(this::handleLikeException);
-        return CompletableFuture.completedFuture(unlikePost(likeDTO)).exceptionally(this::handleLikeException);
-    }
 
     @Transactional
-    public ApiResponse<Like> likePost(LikeDTO likeDTO) {
-        // Find user
-        User user = userRepo.findByUsername(likeDTO.getUsername())
-                .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
+    public ApiResponse<LikeDTO> likePost(LikeDTO likeDTO) {
+       try {
+           // Find user
+           User user = userRepo.findByUsername(likeDTO.getUsername())
+                   .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
 
-        // Find post
-        Post post = postRepo.findById(UUID.fromString(likeDTO.getPostId()))
-                .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
+           // Find post
+           UUID postId = UUID.fromString(likeDTO.getPostId());
+           Post post = postRepo.findByIdNative(postId)
+                   .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
 
-        // Check for existing like
-        if (likeRepo.existsByUserAndPost(user, post)) {
-            throw new BusinessException("User already liked post", HttpStatus.CONFLICT);
-        }
+           // Check for existing like
+           if (likeRepo.existsByUserAndPost(user, post)) {
+               throw new BusinessException("User already liked post", HttpStatus.CONFLICT);
+           }
 
-        // Save Like
-        Like like = Like.builder()
-                .post(post)
-                .user(user)
-                .build();
+           // Save Like
+           Like like = Like.builder()
+                   .post(post)
+                   .user(user)
+                   .build();
 
-        likeRepo.save(like);
+           likeRepo.save(like);
 
-        // Update like count
-        postRepo.incrementLikeCount(post.getId());
+           // Update like count
+           postRepo.incrementLikeCount(post.getId());
 
-        return ApiResponse.success(like, "Successfully liked");
+           return ApiResponse.success(buildLikeResponse(like), "Successfully liked");
+       } catch (Exception ex) {
+           return handleLikeException(ex);
+       }
     }
 
     @Transactional
     public ApiResponse<Object> unlikePost(LikeDTO likeDTO) {
-        // Find user
-        User user = userRepo.findByUsername(likeDTO.getUsername())
-                .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
+        try {
+            // Find user
+            User user = userRepo.findByUsername(likeDTO.getUsername())
+                    .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
 
-        // Find post
-        Post post = postRepo.findById(UUID.fromString(likeDTO.getPostId()))
-                .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
+            // Find post
+            Post post = postRepo.findByIdNative(UUID.fromString(likeDTO.getPostId()))
+                    .orElseThrow(() -> new BusinessException("Post not found", HttpStatus.NOT_FOUND));
 
-        // Check if like exists
-        Like like = likeRepo.findByUserAndPost(user, post)
-                .orElseThrow(() -> new BusinessException("Post not liked by user", HttpStatus.BAD_REQUEST));
-        likeRepo.delete(like);
+            // Check if like exists
+            Like like = likeRepo.findByUserAndPost(user, post)
+                    .orElseThrow(() -> new BusinessException("Post not liked by user", HttpStatus.BAD_REQUEST));
+            likeRepo.delete(like);
 
-        // Update like count
-        postRepo.decrementLikeCount(post.getId());
+            // Update like count
+            postRepo.decrementLikeCount(post.getId());
 
-        return ApiResponse.success(null, "Unlike successful");
+            return ApiResponse.success(null, "Unlike successful");
+        } catch (Exception ex) {
+            return handleLikeException(ex);
+        }
     }
 
     // Extract common exception handling
@@ -112,6 +106,14 @@ public class LikeService {
         } else {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
         }
+    }
+
+
+    private LikeDTO buildLikeResponse(Like like) {
+        return LikeDTO.builder()
+                .postId(like.getPost().getId().toString())
+                .username(like.getUser().getUsername())
+                .build();
     }
 
 }

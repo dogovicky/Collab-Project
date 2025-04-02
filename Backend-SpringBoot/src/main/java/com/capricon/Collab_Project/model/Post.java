@@ -23,6 +23,7 @@ public class Post {
     @Id
     @GeneratedValue
     @UuidGenerator
+    @Column(columnDefinition = "UUID", updatable = false, nullable = false)
     private UUID id;
 
     private String content;

@@ -24,10 +24,10 @@ public class LikeController {
     private final LikeService likeService;
 
     @PostMapping("/like")
-    public CompletableFuture<ResponseEntity<ApiResponse<Like>>> likePost(@Valid @RequestBody LikeDTO likeDTO) {
+    public ResponseEntity<ApiResponse<LikeDTO>> likePost(@Valid @RequestBody LikeDTO likeDTO) {
         log.info("Like request called for post {} by user {}", likeDTO.getPostId(), likeDTO.getUsername());
-        return likeService.like(likeDTO).thenApply(likeResponse -> {
-
+        try {
+            ApiResponse<LikeDTO> likeResponse = likeService.likePost(likeDTO);
             if (likeResponse.isSuccess()) {
                 log.info("Like completed successfully for post {} by user {}",
                         likeDTO.getPostId(), likeDTO.getUsername());
@@ -38,20 +38,20 @@ public class LikeController {
                         likeDTO.getPostId(), likeDTO.getUsername(), likeResponse.getMessage());
                 return ResponseEntity.status(likeResponse.getStatus()).body(likeResponse);
             }
-        }).exceptionally(ex -> {
+        } catch (Exception ex) {
             Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
 
             log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error"));
-        });
+        }
     }
 
     @PatchMapping("/unlike")
-    public CompletableFuture<ResponseEntity<ApiResponse<Object>>> unlikePost(@Valid @RequestBody LikeDTO likeDTO) {
+    public ResponseEntity<ApiResponse<Object>> unlikePost(@Valid @RequestBody LikeDTO likeDTO) {
         log.info("Unlike request called for post {} by user {}", likeDTO.getPostId(), likeDTO.getUsername());
-
-        return likeService.unlike(likeDTO).thenApply(response -> {
+        try {
+            ApiResponse<Object> response = likeService.unlikePost(likeDTO);
             if (response.isSuccess()) {
                 log.info("Unlike completed successfully for post {} by user {}",
                         likeDTO.getPostId(), likeDTO.getUsername());
@@ -63,13 +63,13 @@ public class LikeController {
 
                 return ResponseEntity.status(response.getStatus()).body(response);
             }
-        }).exceptionally(ex -> {
+        } catch (Exception ex) {
             Throwable cause = (ex instanceof CompletionException && ex.getCause() != null) ? ex.getCause() : ex;
 
             log.error("Error processing request caused by {}", cause != null ? cause.getMessage() : "Unknown cause", cause);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error"));
-        });
+        }
     }
 
 }

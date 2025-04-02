@@ -2,14 +2,17 @@ package com.capricon.Collab_Project.dto;
 
 import com.capricon.Collab_Project.model.Post;
 import com.capricon.Collab_Project.model.User;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserProfileDTO {
 
     private String username;
@@ -20,7 +23,6 @@ public class UserProfileDTO {
     private String institution;
     private String phoneNumber;
     private List<String> fieldsOfInterest;
-    private List<Post> posts;
 
     public UserProfileDTO(User user) {
         this.username = user.getUsername();
@@ -33,7 +35,6 @@ public class UserProfileDTO {
         this.fieldsOfInterest = user.getFieldOfInterest() != null ?
                 new ArrayList<>(user.getFieldOfInterest()) :
                 new ArrayList<>();
-        this.posts = user.getPosts() != null ? new ArrayList<>(user.getPosts()) : new ArrayList<>();
     }
 
 }
