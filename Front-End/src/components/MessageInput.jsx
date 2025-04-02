@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { fetchMessages } from '../utils/socket'; // Import fetchMessages from socket utility
 import './MessageInput.css';
 
 const MessageInput = ({ userId, users, onSend }) => {
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    // Fetch messages using the socket
+    fetchMessages('room:lobby')
+      .then((data) => setMessages(data))
+      .catch((error) => console.error('Error fetching messages:', error));
+  }, []);
+
   return (
     <div className="message-input">
+      <div className="message-list">
+        {messages.map((message, index) => (
+          <div key={index} className="message-item">
+            <strong>{message.senderName}:</strong> {message.text}
+          </div>
+        ))}
+      </div>
       <input
         type="text"
         className="message-input__field"

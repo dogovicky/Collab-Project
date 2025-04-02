@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { sendVerificationCode, verifyCode } from '../api/authA';
 
 const EmailValidation = () => {
   const [email, setEmail] = useState('');
@@ -27,16 +27,16 @@ const EmailValidation = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.post('/api/send-verification', { email });
+        const response = await sendVerificationCode(email);
         setCodeSent(true);
-        alert('Verification code sent to your email!');
+        setError(response.message || 'Verification code sent to your email!'); // Display API response message
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to send verification code');
+        setError(err.response?.data?.message || 'Failed to send verification code'); // Display API error message
       } finally {
         setLoading(false);
       }
     } else {
-      alert('Please enter a valid email address.');
+      setError('Please enter a valid email address.');
     }
   };
 
@@ -44,16 +44,12 @@ const EmailValidation = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post('/api/verify-code', {
-        email,
-        code: userCode
-      });
+      const response = await verifyCode(email, userCode);
       setIsVerified(true);
-      alert('Email verified successfully!');
-      // Redirect to home page after successful verification
+      setError(response.message || 'Email verified successfully!'); // Display API response message
       navigate('/home');
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid verification code');
+      setError(err.response?.data?.message || 'Invalid verification code'); // Display API error message
     } finally {
       setLoading(false);
     }

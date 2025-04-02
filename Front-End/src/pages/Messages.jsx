@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MessageList from '../components/MessageList';
 import MessageInput from '../components/MessageInput';
-import socket from '../utils/socket'; // Ensure this points to the updated socket.js
+import socket, { fetchMessages } from '../utils/socket'; // Import fetchMessages
 import './CssSheets/Messages.css';
 
 const Messages = ({ userId, users }) => {
@@ -10,6 +10,18 @@ const Messages = ({ userId, users }) => {
 
   useEffect(() => {
     console.log('Messages component mounted');
+
+    // Fetch messages via the socket
+    const loadMessages = async () => {
+      try {
+        const data = await fetchMessages('room:lobby', { user_id: userId });
+        setMessages(data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    loadMessages();
 
     // Join the Phoenix channel
     const channel = socket.channel('room:lobby', { user_id: userId });

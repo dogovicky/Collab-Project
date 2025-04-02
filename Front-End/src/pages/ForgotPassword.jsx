@@ -19,11 +19,11 @@ const ForgotPassword = () => {
     setError('');
     setMessage('');
     try {
-      await sendResetCode({ email });
-      setMessage('A reset code has been sent to your email.');
+      const response = await sendResetCode({ email });
+      setMessage(response.message || 'A reset code has been sent to your email.');
       setStep(2);
     } catch (err) {
-      setError('Failed to send reset code. Please try again.');
+      setError(err.message || 'Failed to send reset code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -39,15 +39,15 @@ const ForgotPassword = () => {
     setError('');
     setMessage('');
     try {
-      await resetPassword({ code, newPassword });
-      setMessage('Your password has been successfully reset.');
+      const response = await resetPassword({ code, newPassword });
+      setMessage(response.message || 'Your password has been successfully reset.');
       setStep(1);
       setEmail('');
       setCode('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err) {
-      setError('Failed to reset password. Please try again.');
+      setError(err.message || 'Failed to reset password. Please try again.');
     } finally {
       setLoading(false);
     }

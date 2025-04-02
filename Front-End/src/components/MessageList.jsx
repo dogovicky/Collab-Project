@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import socket from '../utils/socket'; // Ensure this points to the updated socket.js
-import './MessageList.css'; 
+import './MessageList.css';
+
 const MessageList = ({ messages, userId, users }) => {
   const messagesEndRef = useRef(null);
 
