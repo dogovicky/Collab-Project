@@ -1,12 +1,11 @@
 package com.capricon.Collab_Project.service;
 
-import com.capricon.Collab_Project.dto.ApiResponse;
-import com.capricon.Collab_Project.dto.ProfileUpdateRequest;
-import com.capricon.Collab_Project.dto.UserProfileDTO;
+import com.capricon.Collab_Project.dto.*;
 import com.capricon.Collab_Project.exception.BaseException;
 import com.capricon.Collab_Project.exception.BusinessException;
 import com.capricon.Collab_Project.exception.TechnicalException;
 import com.capricon.Collab_Project.exception.UserException;
+import com.capricon.Collab_Project.model.Post;
 import com.capricon.Collab_Project.model.User;
 import com.capricon.Collab_Project.model.UserPrincipal;
 import com.capricon.Collab_Project.model.enums.Gender;
@@ -21,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -32,63 +32,58 @@ import java.util.function.Consumer;
 public class UserService {
 
     private final UserRepo userRepo;
-    private final Executor executor;
 
-    public UserService(UserRepo userRepo, Executor executor) {
+    public UserService(UserRepo userRepo) {
         this.userRepo = userRepo;
-        this.executor = executor;
     }
 
-
-    @Async
-    public CompletableFuture<ApiResponse<UserProfileDTO>> fetchProfileData(String username) {
-        log.info("SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
-        return CompletableFuture.completedFuture(getProfileData(username))
-                .exceptionally(this::handleServiceProfileException);
-    }
 
     @Transactional(readOnly = true)
-    public ApiResponse<UserProfileDTO> getProfileData(String username) {
-        User user = userRepo.findProfileDataByUsername(username)
-                .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
+    public ApiResponse<ProfileRequest> getProfileData(String username) {
+        try {
+            // Find user
+            User user = userRepo.findProfileDataByUsername(username)
+                    .orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
+            //Find all posts related to user
+            List<PostDTO> posts = user.getPosts().stream().map(this::buildPostDTO).toList();
+            UserProfileDTO profileDTO = new UserProfileDTO(user);
 
-        return ApiResponse.success(new UserProfileDTO(user));
+            return ApiResponse.success(buildProfileResponse(profileDTO, posts));
+        } catch (Exception ex) {
+            return handleServiceProfileException(ex);
+        }
     }
-
-    @Async
-    public CompletableFuture<ApiResponse<UserProfileDTO>> updateUserProfile(ProfileUpdateRequest request) {
-        UUID userId = getAuthenticatedUserId();
-        return CompletableFuture.completedFuture(updateProfile(userId, request))
-                .exceptionally(this::handleServiceProfileException);
-    }
-
 
     @Transactional
-    public ApiResponse<UserProfileDTO> updateProfile(UUID userId, ProfileUpdateRequest request) {
-        // Find user
-        User user = userRepo.findById(userId).orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
-
-        updateIfNotNull(user::setUsername, request.getUsername());
-        updateIfNotNull(user::setEmail, request.getEmail());
-        updateIfNotNull(user::setFullName, request.getFullName());
-        updateIfNotNull(user::setBio, request.getBio());
-        updateIfNotNull(user::setInstitution, request.getInstitution());
-        updateIfNotNull(user::setPhoneNumber, request.getPhoneNumber());
-
+    public ApiResponse<UserProfileDTO> updateProfile(ProfileUpdateRequest request) {
         try {
-            if (request.getGender() != null && !request.getGender().isEmpty()) {
-                user.setGender(Gender.valueOf(request.getGender()));
+            // Find user
+            User user = userRepo.findById(getAuthenticatedUserId()).orElseThrow(() -> new UserException("User not found", HttpStatus.NOT_FOUND));
+
+            updateIfNotNull(user::setUsername, request.getUsername());
+            updateIfNotNull(user::setEmail, request.getEmail());
+            updateIfNotNull(user::setFullName, request.getFullName());
+            updateIfNotNull(user::setBio, request.getBio());
+            updateIfNotNull(user::setInstitution, request.getInstitution());
+            updateIfNotNull(user::setPhoneNumber, request.getPhoneNumber());
+
+            try {
+                if (request.getGender() != null && !request.getGender().isEmpty()) {
+                    user.setGender(Gender.valueOf(request.getGender()));
+                }
+            } catch (IllegalArgumentException ex) {
+                throw new UserException("Invalid gender value", HttpStatus.BAD_REQUEST);
             }
-        } catch (IllegalArgumentException ex) {
-            throw new UserException("Invalid gender value", HttpStatus.BAD_REQUEST);
-        }
 
-        if (request.getFieldsOfInterest() != null && !request.getFieldsOfInterest().isEmpty()) {
-            user.setFieldOfInterest(request.getFieldsOfInterest());
-        }
+            if (request.getFieldsOfInterest() != null && !request.getFieldsOfInterest().isEmpty()) {
+                user.setFieldOfInterest(request.getFieldsOfInterest());
+            }
 
-        userRepo.save(user);
-        return ApiResponse.success(new UserProfileDTO(user));
+            userRepo.save(user);
+            return ApiResponse.success(new UserProfileDTO(user));
+        } catch (Exception ex) {
+            return handleServiceProfileException(ex);
+        }
     }
 
     private UUID getAuthenticatedUserId() {
@@ -119,6 +114,23 @@ public class UserService {
         } else {
             return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
         }
+    }
+
+    private ProfileRequest buildProfileResponse(UserProfileDTO userProfileDTO, List<PostDTO> posts) {
+        return ProfileRequest.builder()
+                .userProfileDTO(userProfileDTO)
+                .posts(posts)
+                .build();
+    }
+
+    private PostDTO buildPostDTO(Post post) {
+        return PostDTO.builder()
+                .id(post.getId())
+                .label(post.getLabel())
+                .likeCount(post.getLikeCount())
+                .commentCount(post.getCommentCount())
+                .repostCount(post.getRepostCount())
+                .build();
     }
 
 }

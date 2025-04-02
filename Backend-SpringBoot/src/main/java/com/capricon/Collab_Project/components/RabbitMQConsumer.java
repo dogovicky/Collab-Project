@@ -1,6 +1,6 @@
 package com.capricon.Collab_Project.components;
 
-import com.capricon.Collab_Project.dto.UserDTO;
+import com.capricon.Collab_Project.dto.SignUpRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 public class RabbitMQConsumer {
 
     @RabbitListener(queues = "${spring.rabbitmq.queues.user}")
-    public void consumeMessage(UserDTO userDTO) {
-        log.info("Received User: {}", userDTO);
+    public void consumeMessage(SignUpRequest signUpRequest) {
+        log.info("Received User: {}", signUpRequest);
     }
 
 }

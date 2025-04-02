@@ -33,8 +33,8 @@ public class AuthController {
     private final PasswordResetService resetService;
 
     @PostMapping("/signup")
-    public CompletableFuture<ResponseEntity<ApiResponse<String>>> signUp(@Valid @RequestBody UserDTO userDTO) {
-        return signUpService.signUp(userDTO)
+    public CompletableFuture<ResponseEntity<ApiResponse<String>>> signUp(@Valid @RequestBody SignUpRequest signUpRequest) {
+        return signUpService.signUp(signUpRequest)
                 .thenApply(ResponseEntity::ok)
                 .exceptionally(this::handleAuthControllerException);
     }

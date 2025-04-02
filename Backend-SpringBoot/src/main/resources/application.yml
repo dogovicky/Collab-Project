@@ -29,14 +29,16 @@ spring:
     exchanges:
       user: user.exchange
       chat: chat.exchange
-      notification: notification.exchange
+      notifications: notifications.exchange
     queues:
       user: user.queue
       recommendation: recommendation.queue
       connection: connection.queue
       event: event.queue
+      notifications: notifications.queue
     routingKeys:
       user.signup.key: user.signup
+      notifications.key: notifications.key
 
 jwt:
   secret: av7Mp5zVtb3S467pWQ6A1MXRr0tBrqydU6+MeMfEQSw=

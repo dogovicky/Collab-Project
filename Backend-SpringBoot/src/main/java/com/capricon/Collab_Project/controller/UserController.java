@@ -1,6 +1,7 @@
 package com.capricon.Collab_Project.controller;
 
 import com.capricon.Collab_Project.dto.ApiResponse;
+import com.capricon.Collab_Project.dto.ProfileRequest;
 import com.capricon.Collab_Project.dto.ProfileUpdateRequest;
 import com.capricon.Collab_Project.dto.UserProfileDTO;
 import com.capricon.Collab_Project.exception.UserException;
@@ -24,19 +25,36 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/profile")
-    public CompletableFuture<ResponseEntity<ApiResponse<UserProfileDTO>>> getProfileData(@RequestParam String username) {
+    public ResponseEntity<ApiResponse<ProfileRequest>> getProfileData(@RequestParam String username) {
         log.info("Received profile request for user: {}", username);
-        log.info("SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
-        return userService.fetchProfileData(username)
-                .thenApply(ResponseEntity::ok)
-                .exceptionally(this::handleProfileControllerException);
+        try {
+            ApiResponse<ProfileRequest> response = userService.getProfileData(username);
+            if (response.isSuccess()) {
+                log.info("Successfully retrieved profile data for user: {}", username);
+                return ResponseEntity.ok(response);
+            } else {
+                log.error("Failed to retrieve profile data for user: {}", username);
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        } catch (Exception ex) {
+            return handleProfileControllerException(ex);
+        }
     }
 
     @PutMapping("/profile/update")
-    public CompletableFuture<ResponseEntity<ApiResponse<UserProfileDTO>>> updateProfile(@Valid @RequestBody ProfileUpdateRequest request) {
-        return userService.updateUserProfile(request)
-                .thenApply(ResponseEntity::ok)
-                .exceptionally(this::handleProfileControllerException);
+    public ResponseEntity<ApiResponse<UserProfileDTO>> updateProfile(@Valid @RequestBody ProfileUpdateRequest request) {
+        try {
+            ApiResponse<UserProfileDTO> response = userService.updateProfile(request);
+            if (response.isSuccess()) {
+                log.info("Successfully updated profile for user: {}", request.getUsername());
+                return ResponseEntity.ok(response);
+            } else {
+                log.error("Failed to update profile for user: {}", request.getUsername());
+                return ResponseEntity.status(response.getStatus()).body(response);
+            }
+        } catch (Exception ex) {
+            return handleProfileControllerException(ex);
+        }
     }
 
     private <T> ResponseEntity<ApiResponse<T>> handleProfileControllerException(Throwable ex) {

@@ -3,12 +3,14 @@ package com.capricon.Collab_Project.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.UUID;
 
 @Getter
 @AllArgsConstructor
+@Builder
 public class LikeDTO {
 
     //@NotBlank(message = "Post ID not supposed to be null")
