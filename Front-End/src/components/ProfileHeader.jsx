@@ -1,16 +1,19 @@
 import { useState } from "react";
 import "../pages/CssSheets/ProfileHeader.css";
-import { createPost } from "../api/authA"; // Updated import for API usage
+import { toggleFollow } from "../api/authA"; // Import the new API function
 
 const ProfileHeader = ({ user }) => {
   const [isFollowing, setIsFollowing] = useState(user?.isFollowing);
+  const [message, setMessage] = useState(""); // State for displaying messages
 
   const handleFollowToggle = async () => {
     try {
+      const response = await toggleFollow(user.id, !isFollowing); // Use the new API function
       setIsFollowing(!isFollowing);
-      await axios.post(`/api/follow`, { userId: user.id, follow: !isFollowing });
+      setMessage(response.message || "Follow status updated successfully!"); // Use API response message
     } catch (error) {
       console.error("Failed to update follow status:", error);
+      setMessage(error.message || "An error occurred. Please try again."); // Use error message
     }
   };
 
@@ -31,6 +34,7 @@ const ProfileHeader = ({ user }) => {
       >
         {isFollowing ? "disconnect" : "connect"}
       </button>
+      {message && <p className="message">{message}</p>} {/* Display message */}
     </div>
   );
 };

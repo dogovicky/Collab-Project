@@ -3,57 +3,34 @@ import ProfileHeader from "../components/ProfileHeader";
 import ProfileStats from "../components/ProfileStats";
 import EditProfileModal from "../components/EditProfileModal";
 import Post from "../components/Post"; // Ensure Post component is imported
-import { createPost } from "../api/authA"; // Import API for potential usage
+import { createPost, fetchUserData, updateUserData } from "../api/authA"; // Import API functions
 import "../pages/CssSheets/ProfilePage.css";
-
-const mockUser = {
-  id: 1,
-  name: "John Doe",
-  username: "johndoe",
-  avatar: "https://via.placeholder.com/80",
-  bio: "Software Engineer | Tech Enthusiast",
-  isFollowing: true,
-  stats: {
-    posts: 120,
-    followers: 300,
-    following: 180,
-  },
-  posts: [
-    {
-      id: 1,
-      content: "This is my first post!",
-      postTime: "2 hours ago",
-      comments: [],
-    },
-    {
-      id: 2,
-      content: "Loving the new features!",
-      postTime: "1 day ago",
-      comments: [],
-    },
-  ],
-  reposts: [
-    {
-      id: 3,
-      content: "Check out this amazing article!",
-      postTime: "3 days ago",
-      comments: [],
-    },
-  ],
-};
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    // TODO: Fetch user data from API
-    setUser(mockUser);
+    const getUserData = async () => {
+      try {
+        const userData = await fetchUserData(); // Fetch user data from backend
+        setUser(userData);
+      } catch (error) {
+        alert(error.message); // Display error message
+      }
+    };
+    getUserData();
   }, []);
 
-  const handleSave = (updatedUser) => {
-    setUser({ ...user, ...updatedUser });
-    setIsEditing(false);
+  const handleSave = async (updatedUser) => {
+    try {
+      const savedUser = await updateUserData(updatedUser); // Update user data in backend
+      setUser({ ...user, ...savedUser });
+      setIsEditing(false);
+      alert("Profile updated successfully!"); // Display success message
+    } catch (error) {
+      alert(error.message); // Display error message
+    }
   };
 
   if (!user) return <div>Loading...</div>;

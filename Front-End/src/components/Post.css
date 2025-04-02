@@ -53,10 +53,14 @@
 .post__actions {
   display: flex;
   justify-content: space-between;
+  gap: 10px; /* Add space between buttons */
   margin-top: 14px;
 }
 
 .post__actions button {
+  flex: 1; /* Ensure buttons take equal width */
+  max-width: 100px; /* Set a reasonable maximum width */
+  text-align: center; /* Center-align text inside buttons */
   background-color: #334155;
   color: #f1f5f9;
   font-size: 14px;

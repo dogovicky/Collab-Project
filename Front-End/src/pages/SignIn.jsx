@@ -10,7 +10,7 @@ const SignIn = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    email: "",
+    username: "", // Changed from email to username
     password: "",
   });
 
@@ -19,7 +19,7 @@ const SignIn = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.email.trim()) newErrors.email = "Email is required";
+    if (!formData.username.trim()) newErrors.username = "Username is required"; // Updated validation
     if (!formData.password.trim()) newErrors.password = "Password is required";
     return newErrors;
   };
@@ -47,11 +47,19 @@ const SignIn = () => {
 
     try {
       const response = await loginUser(formData); // Call API
+
+      if (!response.token) {
+        throw new Error("Authentication failed. Invalid credentials.");
+      }
+
       login(response.token); // Use the login function from auth context
       toast.success("Logged in successfully!");
       navigate("/home");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed. Please try again.");
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors); // Set form-specific errors from API
+      }
+      toast.error(error.response?.data?.message || error.message || "Login failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -71,19 +79,19 @@ const SignIn = () => {
           <h2>Log Into Nexus</h2> 
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="username">Username</label>
               <input
                 type="text"
-                id="email"
-                name="email"
-                value={formData.email}
+                id="username"
+                name="username"
+                value={formData.username} // value binding
                 onChange={handleChange}
-                className={errors.email ? "error" : ""}
+                className={errors.username ? "error" : ""}
                 disabled={isSubmitting}
-                placeholder="Enter your email"
+                placeholder="Enter your username"
               />
-              {errors.email && (
-                <span className="error-message">{errors.email}</span>
+              {errors.username && (
+                <span className="error-message">{errors.username}</span>
               )}
             </div>
             <div className="form-group">
