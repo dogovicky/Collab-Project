@@ -32,4 +32,16 @@ public class ExceptionTest {
         assertEquals("System failure occurred", exception.getMessage());
     }
 
+    @Test
+    void shouldThrowUserExceptionWithCorrectMessage() {
+        UserException exception = assertThrows(
+                UserException.class,
+                () -> {
+                    throw new UserException("User exception thrown");
+                }
+        );
+
+        assertEquals("User exception thrown", exception.getMessage());
+    }
+
 }

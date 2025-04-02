@@ -1,37 +1,40 @@
 package com.capricon.Collab_Project.model;
 
+
 import com.capricon.Collab_Project.model.enums.Gender;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.sql.Timestamp;
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Table(name = "users")
-public class User {
+@Access(AccessType.FIELD)
+public class User implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue
     @UuidGenerator
-    @Column(name = "UUID")
+    @Column(name = "uuid")
     private UUID uuid;
 
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(name = "fullName", nullable = false, unique = true)
+    @Column(name = "full_name", nullable = false, unique = true)
     private String fullName;
 
     @Column(nullable = false, unique = true)
@@ -40,34 +43,32 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "gender", columnDefinition = "genderEnum")
+    @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private String institution;
     private String bio;
 
-    @Column(name = "phoneNumber")
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "profilePictureUrl")
+    @Column(name = "profile_picture_url")
     private String profilePictureUrl;
 
-    @Column(name = "dateOfBirth")
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @Column(name = "createdAt", nullable = false, updatable = false)
-    private Timestamp createdAt;
-
-    @Column(name = "fieldOfInterest", columnDefinition = "TEXT[]")
+    @Column(name = "field_of_interest", columnDefinition = "TEXT[]")
     private List<String> fieldOfInterest;
 
-    @Column(name = "isEnabled")
+    @Column(name = "is_enabled")
     private Boolean isEnabled;
 
-    @Column(name = "verificationCode")
+    @Column(name = "verification_code")
     private String verificationCode;
 
-    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<CommunityMembership> communityMemberships;
 
     @OneToMany(mappedBy = "userId") //Connections initiated by this user
@@ -102,11 +103,5 @@ public class User {
 
     @OneToMany(mappedBy = "userId")
     private List<Attachment> attachments;
-
-    protected void onCreate() {
-        this.createdAt = Timestamp.valueOf(LocalDateTime.now());
-    }
-
-
 
 }

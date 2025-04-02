@@ -19,18 +19,21 @@ public class Comment {
     @Id
     @GeneratedValue
     @UuidGenerator
+    @Column(name = "comment_id")
     private UUID commentId;
 
     @ManyToOne
-    @JoinColumn(name = "postId", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post postId;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User userId;
 
+    @Column(name = "comment_text")
     private String commentText;
 
+    @Column(name = "created_at")
     private Timestamp createdAt;
 
 }

@@ -21,15 +21,15 @@ public class CommunityMembership {
     @UuidGenerator
     private UUID uuid;
 
-    @Column(name = "joinedAt")
+    @Column(name = "joined_at")
     private Timestamp joinedAt;
 
     @ManyToOne
-    @JoinColumn(name = "communityId", nullable = false, referencedColumnName = "uuid")
+    @JoinColumn(name = "community_id", nullable = false, referencedColumnName = "uuid")
     private Community communityId;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false, referencedColumnName = "UUID")
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "UUID")
     private User userId;
 
 }

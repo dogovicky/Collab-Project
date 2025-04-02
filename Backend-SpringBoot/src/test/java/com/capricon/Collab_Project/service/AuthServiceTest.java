@@ -1,6 +1,6 @@
 package com.capricon.Collab_Project.service;
 
-import com.capricon.Collab_Project.dto.SignUpRequest;
+import com.capricon.Collab_Project.dto.UserDTO;
 import com.capricon.Collab_Project.model.User;
 import com.capricon.Collab_Project.model.enums.Gender;
 import com.capricon.Collab_Project.repository.UserRepo;
@@ -45,11 +45,11 @@ public class AuthServiceTest {
     void shouldRegisterUserSuccessfully() throws ExecutionException, InterruptedException {
 
         //Given
-        SignUpRequest request = new SignUpRequest();
+        UserDTO request = new UserDTO();
         request.setUsername("testUser");
         request.setEmail("test@example.com");
         request.setPassword("P@ssword123");
-        request.setGender(Gender.MALE);
+        request.setGender(String.valueOf(Gender.MALE));
         request.setFullName("Test User");
         request.setDateOfBirth(LocalDate.of(2000, 1, 1));
         request.setPhoneNumber("12345678");
@@ -61,7 +61,7 @@ public class AuthServiceTest {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password("hashedPassword")
-                .gender(request.getGender())
+                .gender(Gender.valueOf(request.getGender()))
                 .isEnabled(false)
                 .verificationCode("123456")
                 .build();
@@ -88,7 +88,7 @@ public class AuthServiceTest {
     @Test
     void shouldThrowExceptionWhenUserAlreadyExists() {
         //Given
-        SignUpRequest request = new SignUpRequest();
+        UserDTO request = new UserDTO();
         request.setUsername("testUser");
         request.setEmail("test@example.com");
 
@@ -105,7 +105,7 @@ public class AuthServiceTest {
     @Test
     void shouldHandleDatabaseException() {
         //Given
-        SignUpRequest request = new SignUpRequest();
+        UserDTO request = new UserDTO();
         request.setUsername("newUser");
         request.setEmail("new@example.com");
 

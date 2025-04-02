@@ -25,15 +25,16 @@ public class Post {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "authorId", nullable = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User authorId;
 
     @ManyToOne
-    @JoinColumn(name = "communityId", nullable = false)
+    @JoinColumn(name = "community_id", nullable = false)
     private Community communityId;
 
     private String label;
 
+    @Column(name = "created_at")
     private Timestamp createdAt;
 
     @OneToMany(mappedBy = "postId", cascade = CascadeType.ALL)
