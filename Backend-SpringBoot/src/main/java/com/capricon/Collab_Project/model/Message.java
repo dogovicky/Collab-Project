@@ -23,20 +23,23 @@ public class Message {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "senderId", nullable = false)
+    @JoinColumn(name = "sender_id", nullable = false)
     private User senderId;
 
     @ManyToOne
-    @JoinColumn(name = "receiverId", nullable = false)
+    @JoinColumn(name = "receiver_id", nullable = false)
     private User receiverId;
 
+    @Column(name = "message_text")
     private String messageText;
 
+    @Column(name = "sent_at")
     private Timestamp sentAt;
 
+    @Column(name = "read_at")
     private Timestamp readAt;
 
-    @OneToMany(mappedBy = "messageId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
     private List<Attachment> attachments;
 
 }

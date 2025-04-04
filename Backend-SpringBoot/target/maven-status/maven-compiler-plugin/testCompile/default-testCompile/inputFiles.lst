@@ -1,2 +1,4 @@
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/test/java/com/capricon/Collab_Project/CollabProjectApplicationTests.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/test/java/com/capricon/Collab_Project/exception/ExceptionTest.java
+/home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/test/java/com/capricon/Collab_Project/service/AuthServiceTest.java
+/home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/test/java/com/capricon/Collab_Project/service/EventPublisherTest.java

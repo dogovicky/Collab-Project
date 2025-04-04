@@ -1,71 +1,91 @@
 package com.capricon.Collab_Project.exception;
 
-import com.capricon.Collab_Project.dto.ErrorResponse;
+import com.capricon.Collab_Project.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex, HttpServletRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.BAD_REQUEST.value(),
-                "Business Error",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ApiResponse<Object>> handleGenericBaseException(BaseException ex, HttpServletRequest request) {
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        log.error("Unhandled exception occurred: ", ex);
+        ApiResponse<Object> response = ApiResponse.error(ex.getStatus(), ex.getMessage());
+        return new ResponseEntity<>(response, ex.getStatus());
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Object>> handleBusinessException(BusinessException ex, HttpServletRequest request) {
+        return handleGenericBaseException(ex, request);
     }
 
     @ExceptionHandler(TechnicalException.class)
-    public ResponseEntity<ErrorResponse> handleTechnicalException(TechnicalException ex, HttpServletRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Technical Error",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+    public ResponseEntity<ApiResponse<Object>> handleTechnicalException(TechnicalException ex, HttpServletRequest request) {
+        return handleGenericBaseException(ex, request);
+    }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<ApiResponse<Object>> handleUserException(UserException ex, HttpServletRequest request) {
+        return handleGenericBaseException(ex, request);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleValidationException(ValidationException ex, HttpServletRequest request) {
+        return handleGenericBaseException(ex, request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodNotValidException(MethodArgumentNotValidException ex,
-                                                                       HttpServletRequest request) {
-        Map<String, String> errors = new HashMap<>();
+    public ResponseEntity<ApiResponse<Object>> handleMethodNotValidException(MethodArgumentNotValidException ex) {
 
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        List<ApiResponse.ErrorDetail> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(fieldError -> ApiResponse.ErrorDetail.builder()
+                        .field(fieldError.getField())
+                        .message(fieldError.getDefaultMessage())
+                        .code(fieldError.getCode()) // e.g., "NotBlank", "Size"
+                        .build()
+                )
+                .toList();
+
+        ApiResponse<Object> response = ApiResponse.error(
+                HttpStatus.BAD_REQUEST,
                 "Validation Error",
-                errors,
-                request.getRequestURI()
+                errors
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return ResponseEntity.badRequest().body(response);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Unexpected Error",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleConstraintViolationException(
+            ConstraintViolationException ex, HttpServletRequest request) {
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        List<ApiResponse.ErrorDetail> errorDetails = ex.getConstraintViolations()
+                .stream()
+                .map(error -> ApiResponse.ErrorDetail.builder()
+                        .message(error.getMessage())
+                        .build()).toList();
+
+        ApiResponse<Object> response = ApiResponse.error(HttpStatus.BAD_REQUEST, ex.getMessage(), errorDetails);
+        return ResponseEntity.badRequest().body(response);
+    }
+
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex, HttpServletRequest request) {
+        ApiResponse<Object> response = ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
 }

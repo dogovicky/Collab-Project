@@ -20,14 +20,15 @@ public class Notification {
     @Id
     @GeneratedValue
     @UuidGenerator
+    @Column(name = "notification_id")
     private UUID notificationId;
 
     @ManyToOne
-    @JoinColumn(name = "senderId", nullable = false)
+    @JoinColumn(name = "sender_id", nullable = false)
     private User senderId;
 
     @ManyToOne
-    @JoinColumn(name = "receiverId", nullable = false)
+    @JoinColumn(name = "receiver_id", nullable = false)
     private User receiverId;
 
     private String message;
@@ -36,10 +37,13 @@ public class Notification {
     @Column(columnDefinition = "notificationType")
     private NotificationType type;
 
+    @Column(name = "is_read")
     private boolean isRead;
 
+    @Column(name = "reference_id")
     private UUID referenceId;
 
+    @Column(name = "created_at")
     private Timestamp createdAt;
 
 }
