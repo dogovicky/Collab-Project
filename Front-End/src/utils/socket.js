@@ -1,8 +1,11 @@
 import { Socket } from 'phoenix';
 
 // Initialize the Phoenix socket connection
-const socket = new Socket('ws://192.168.155.172:4000/socket'); // Replace with your Phoenix server URL
-socket.connect();
+const socket = new Socket("ws://localhost:4000/socket", {
+  params: { user_id: "123" } // Replace "123" with the actual user ID
+});
+// Connect to the socket
+socket.connect()
 
 // Add error handling
 socket.onError(() => {
