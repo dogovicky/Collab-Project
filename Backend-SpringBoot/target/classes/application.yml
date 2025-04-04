@@ -30,6 +30,7 @@ spring:
       user: user.exchange
       chat: chat.exchange
       notifications: notifications.exchange
+      connection: connection.exchange
     queues:
       user: user.queue
       recommendation: recommendation.queue
@@ -39,6 +40,7 @@ spring:
     routingKeys:
       user.signup.key: user.signup
       notifications.key: notifications.key
+      connection.key : connection.key
 
 jwt:
   secret: av7Mp5zVtb3S467pWQ6A1MXRr0tBrqydU6+MeMfEQSw=
