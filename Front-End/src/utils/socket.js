@@ -1,8 +1,8 @@
 import { Socket } from 'phoenix';
 
 const API_CONFIG = {
-  WS_URL: process.env.REACT_APP_WS_URL || 'ws://localhost:4000',
-  API_URL: process.env.REACT_APP_API_URL || 'http://localhost:4000',
+  WS_URL: 'ws://localhost:4000',
+  API_URL:  'http://localhost:4000',
 };
 
 let socket = null;
