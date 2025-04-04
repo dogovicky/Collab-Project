@@ -24,6 +24,8 @@ const SignUp = () => {
   const [errors, setErrors] = useState({});
   const { isSubmitting, submitSignUp } = useSignUp();
   const { validateForm } = useFormValidation(formData);
+  const [apiError, setApiError] = useState(null);
+  const [apiSuccess, setApiSuccess] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -41,31 +43,56 @@ const SignUp = () => {
     }
   };
 
-  const nextStep = (e) => {
-    e.preventDefault(); // Prevent default form behavior
-    const fieldsToValidate = Object.keys(formData).filter((key) => {
-      if (step === 1) return ["email", "password"].includes(key);
-      if (step === 2) return ["firstName", "lastName"].includes(key);
-      if (step === 3) return ["profilePicture", "bio", "institution", "fieldsOfInterest"].includes(key);
-      return false;
-    });
+  const nextStep = async (e) => {
+    e.preventDefault();
+    setApiError(null);
+    let currentStepValid = true;
+    let newErrors = {};
 
-    const validationErrors = validateForm(fieldsToValidate);
+    if (step === 1) {
+      try {
+        // Call API to check if email exists
+        const response = await axios.post('/api/check-email', { email: formData.email });
+        if (response.data.exists) {
+          newErrors.email = 'Email already exists';
+          currentStepValid = false;
+        }
+      } catch (error) {
+        setApiError(error.response?.data?.message || 'An error occurred');
+        currentStepValid = false;
+      }
+    }
 
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      alert("Please fix the errors before proceeding to the next step."); // Feedback for validation failure
+    // Validate current step
+    if (step === 1) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      
+      if (!emailRegex.test(formData.email)) {
+        newErrors.email = 'Please enter a valid email';
+        currentStepValid = false;
+      }
+      if (!passwordRegex.test(formData.password)) {
+        newErrors.password = 'Please enter a valid password';
+        currentStepValid = false;
+      }
+    }
+
+    if (!currentStepValid) {
+      setErrors(newErrors);
       return;
     }
 
+    // If validation passes, clear errors and move to next step
     setErrors({});
-    setStep((prev) => prev + 1); // Move to the next step
+    setStep(prevStep => prevStep + 1);
   };
 
   const prevStep = () => setStep((prev) => prev - 1);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form behavior
+    setApiError(null);
     if (step === 4) {
       const validationErrors = validateForm();
       if (Object.keys(validationErrors).length > 0) {
@@ -74,9 +101,9 @@ const SignUp = () => {
       }
       try {
         const response = await signUp(formData); // Use the signUp API here
-        alert('Signup successful! A verification code has been sent to your email.');
-      } catch (err) {
-        alert('Signup failed. Please try again.');
+        setApiSuccess(response.data.message || 'Signup successful! Please check your email for verification.');
+      } catch (error) {
+        setApiError(error.response?.data?.message || 'Signup failed. Please try again.');
       }
     }
   };
@@ -84,6 +111,8 @@ const SignUp = () => {
   return (
     <div className="sign-up-page">
       <div className="sign-up-container">
+        {apiError && <div className="api-error">{apiError}</div>}
+        {apiSuccess && <div className="api-success">{apiSuccess}</div>}
         <h2>Step {step} of 4</h2>
         <form onSubmit={handleSubmit}>
           {step === 1 && (

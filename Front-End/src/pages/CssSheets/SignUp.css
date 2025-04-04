@@ -106,4 +106,22 @@
   }
 }
 
+.api-error {
+  color: #ff0000;
+  background-color: #ffe6e6;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.api-success {
+  color: #008000;
+  background-color: #e6ffe6;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  text-align: center;
+}
+
 

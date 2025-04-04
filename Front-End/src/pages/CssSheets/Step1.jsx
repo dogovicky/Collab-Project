@@ -2,6 +2,11 @@ import { FaArrowRight, FaEnvelope, FaLock } from 'react-icons/fa';
 import './Step1.css';
 
 const Step1 = ({ formData = {}, handleChange, nextStep, errors = {} }) => {
+    const handleNextStep = (e) => {
+        e.preventDefault();
+        nextStep(e);
+    };
+
     return (
       <div>
         <div>
@@ -16,8 +21,8 @@ const Step1 = ({ formData = {}, handleChange, nextStep, errors = {} }) => {
           />
         </div>
         {errors.email && (
-          <p className="error">
-            {errors.email} (e.g., example@domain.com)
+          <p className="error" data-testid="email-error">
+            {errors.email}
           </p>
         )}
   
@@ -34,13 +39,13 @@ const Step1 = ({ formData = {}, handleChange, nextStep, errors = {} }) => {
         </div>
         {errors.password && (
           <p className="error">
-            {errors.password} (Password must be at least 8 characters long, include uppercase, lowercase, a number, and a special character.)
+            {errors.password}
           </p>
         )}
   
-        <button onClick={nextStep}>Next <FaArrowRight /></button>
+        <button type="button" onClick={handleNextStep}>Next <FaArrowRight /></button>
       </div>
     );
-  };
-  
-  export default Step1;
+};
+
+export default Step1;
