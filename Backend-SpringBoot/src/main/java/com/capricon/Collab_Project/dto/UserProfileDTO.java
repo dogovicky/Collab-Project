@@ -1,14 +1,18 @@
 package com.capricon.Collab_Project.dto;
 
+import com.capricon.Collab_Project.model.Post;
 import com.capricon.Collab_Project.model.User;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserProfileDTO {
 
     private String username;

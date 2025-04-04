@@ -1,6 +1,6 @@
 package com.capricon.Collab_Project.exception;
 
-import com.capricon.Collab_Project.dto.ErrorResponse;
+import com.capricon.Collab_Project.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -10,124 +10,82 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
-    public ResponseEntity<ErrorResponse> handleGenericBaseException(BaseException ex, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Object>> handleGenericBaseException(BaseException ex, HttpServletRequest request) {
 
         log.error("Unhandled exception occurred: ", ex);
-        String errorMessage = (ex != null) ? (ex.getMessage() != null ? ex.getMessage() : "Unknown error") : "Unknown error";
-
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "INTERNAL_ERROR",
-                errorMessage,
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        ApiResponse<Object> response = ApiResponse.error(ex.getStatus(), ex.getMessage());
+        return new ResponseEntity<>(response, ex.getStatus());
     }
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex, HttpServletRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.BAD_REQUEST.value(),
-                "BUSINESS_ERROR",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    public ResponseEntity<ApiResponse<Object>> handleBusinessException(BusinessException ex, HttpServletRequest request) {
+        return handleGenericBaseException(ex, request);
     }
 
     @ExceptionHandler(TechnicalException.class)
-    public ResponseEntity<ErrorResponse> handleTechnicalException(TechnicalException ex, HttpServletRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "TECHNICAL_ERROR",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    public ResponseEntity<ApiResponse<Object>> handleTechnicalException(TechnicalException ex, HttpServletRequest request) {
+        return handleGenericBaseException(ex, request);
     }
 
     @ExceptionHandler(UserException.class)
-    public ResponseEntity<ErrorResponse> handleUserException(UserException ex, HttpServletRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.UNAUTHORIZED.value(),
-                "AUTH_USER_ERROR",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    public ResponseEntity<ApiResponse<Object>> handleUserException(UserException ex, HttpServletRequest request) {
+        return handleGenericBaseException(ex, request);
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex, HttpServletRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.BAD_REQUEST.value(),
-                "INVALID_REQUEST",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    public ResponseEntity<ApiResponse<Object>> handleValidationException(ValidationException ex, HttpServletRequest request) {
+        return handleGenericBaseException(ex, request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleMethodNotValidException(MethodArgumentNotValidException ex,
-                                                                       HttpServletRequest request) {
-        Map<String, String> errors = new HashMap<>();
+    public ResponseEntity<ApiResponse<Object>> handleMethodNotValidException(MethodArgumentNotValidException ex) {
 
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.BAD_REQUEST.value(),
-                "VALIDATION_ERROR",
-                errors,
-                request.getRequestURI()
+        List<ApiResponse.ErrorDetail> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(fieldError -> ApiResponse.ErrorDetail.builder()
+                        .field(fieldError.getField())
+                        .message(fieldError.getDefaultMessage())
+                        .code(fieldError.getCode()) // e.g., "NotBlank", "Size"
+                        .build()
+                )
+                .toList();
+
+        ApiResponse<Object> response = ApiResponse.error(
+                HttpStatus.BAD_REQUEST,
+                "Validation Error",
+                errors
         );
-        log.error("Validation error occurred: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+
+        return ResponseEntity.badRequest().body(response);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+    public ResponseEntity<ApiResponse<Object>> handleConstraintViolationException(
             ConstraintViolationException ex, HttpServletRequest request) {
 
-        Map<String, String> errors = new HashMap<>();
-        ex.getConstraintViolations().forEach(violation -> {
-            errors.put(violation.getPropertyPath().toString(), violation.getMessage());
-        });
+        List<ApiResponse.ErrorDetail> errorDetails = ex.getConstraintViolations()
+                .stream()
+                .map(error -> ApiResponse.ErrorDetail.builder()
+                        .message(error.getMessage())
+                        .build()).toList();
 
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.BAD_REQUEST.value(),
-                "VALIDATION_ERROR",
-                errors,
-                request.getRequestURI()
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        ApiResponse<Object> response = ApiResponse.error(HttpStatus.BAD_REQUEST, ex.getMessage(), errorDetails);
+        return ResponseEntity.badRequest().body(response);
     }
 
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "UNEXPECTED_ERROR",
-                ex.getMessage(),
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex, HttpServletRequest request) {
+        ApiResponse<Object> response = ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
 }

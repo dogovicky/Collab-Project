@@ -39,7 +39,7 @@ public class Message {
     @Column(name = "read_at")
     private Timestamp readAt;
 
-    @OneToMany(mappedBy = "messageId", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
     private List<Attachment> attachments;
 
 }

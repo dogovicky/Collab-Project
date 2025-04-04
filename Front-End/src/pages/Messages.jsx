@@ -1,70 +1,89 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { toast } from 'react-toastify';
 import MessageList from '../components/MessageList';
 import MessageInput from '../components/MessageInput';
-import socket, { fetchMessages } from '../utils/socket'; // Import fetchMessages
+import { connectSocket, joinChannel, fetchMessages, pushMessage } from '../utils/socket'; // Import connectSocket and joinChannel
 import './CssSheets/Messages.css';
 
 const Messages = ({ userId, users }) => {
   const [messages, setMessages] = useState([]);
+  const [connected, setConnected] = useState(false);
   const channelRef = useRef(null);
 
   useEffect(() => {
-    console.log('Messages component mounted');
+    let currentChannel;
+    let reconnectTimer;
 
-    // Fetch messages via the socket
-    const loadMessages = async () => {
+    const setupChannel = async () => {
       try {
-        const data = await fetchMessages('room:lobby', { user_id: userId });
-        setMessages(data);
+        const socket = connectSocket();
+        if (!socket) {
+          throw new Error('Failed to create socket connection');
+        }
+
+        const { channel } = await joinChannel('room:lobby', { user_id: userId });
+        currentChannel = channel;
+        channelRef.current = channel;
+        setConnected(true);
+
+        channel.on('new_message', (payload) => {
+          const newMessage = {
+            id: payload.id,
+            content: payload.message,
+            sender_id: payload.sender_id,
+            sender_name: payload.sender_name,
+            sender_avatar: payload.sender_avatar,
+            inserted_at: payload.inserted_at
+          };
+          setMessages(prev => [...prev, newMessage]);
+        });
+
+        const existingMessages = await fetchMessages('room:lobby', { user_id: userId });
+        setMessages(existingMessages.messages || []);
       } catch (error) {
-        console.error('Error fetching messages:', error);
+        console.error('Channel setup failed:', error);
+        setConnected(false);
+        toast.error('Connection lost. Attempting to reconnect...');
+        // Attempt to reconnect after 5 seconds
+        reconnectTimer = setTimeout(setupChannel, 5000);
       }
     };
 
-    loadMessages();
-
-    // Join the Phoenix channel
-    const channel = socket.channel('room:lobby', { user_id: userId });
-    channelRef.current = channel;
-    channel
-      .join()
-      .receive('ok', () => console.log('Joined channel successfully'))
-      .receive('error', (resp) => console.error('Unable to join channel', resp));
-
-    // Listen for incoming messages
-    const handleNewMessage = (payload) => {
-      console.log('Received message:', payload);
-      setMessages((prev) => [...prev, payload]);
-    };
-
-    channel.on('new_message', handleNewMessage);
+    setupChannel();
 
     return () => {
-      console.log('Messages component unmounted');
-      channel.leave();
+      if (currentChannel) {
+        currentChannel.leave();
+      }
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+      }
     };
   }, [userId]);
 
   // Handle sending a message
-  const handleSendMessage = (content) => {
-    if (content.trim()) {
-      const newMessage = {
-        _id: Date.now().toString(),
-        senderId: userId,
-        content,
-        timestamp: new Date().toISOString(),
-      };
-
-      console.log('Sending message:', newMessage);
-      channelRef.current.push('send_message', newMessage);
-
-      // Update local state immediately for faster UX
-      setMessages((prev) => [...prev, newMessage]);
+  const handleSendMessage = async (content) => {
+    if (!content.trim() || !channelRef.current) return;
+    
+    try {
+      await pushMessage(channelRef.current, 'new_message', {
+        message: content,
+        sender_id: userId,
+        room_id: 'lobby'
+      });
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      toast.error('Failed to send message. Please try again.');
     }
   };
 
   return (
     <div className="messages">
+      {!connected && (
+        <div className="connection-status">
+          Attempting to connect...
+        </div>
+      )}
       {/* Message list */}
       <div className="messages__list">
         <MessageList messages={messages} userId={userId} users={users} />

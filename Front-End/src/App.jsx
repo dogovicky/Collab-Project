@@ -23,7 +23,8 @@ function App() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/emailValidation" element={<EmailValidation />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/messages" element={<Messages />} />
+          <Route path="/messages" element={<Messages />
+          } />
           <Route path="/connections" element={<Connections />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/notifications" element={<NotificationPage />} />

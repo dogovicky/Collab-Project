@@ -1,7 +1,16 @@
 package com.capricon.Collab_Project.exception;
 
-public class BaseException extends RuntimeException {
-    public BaseException(String message) {
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+public abstract class BaseException extends RuntimeException {
+
+    private final HttpStatus status;
+
+    public BaseException(String message, HttpStatus status) {
         super(message);
+        this.status = status;
     }
+
 }

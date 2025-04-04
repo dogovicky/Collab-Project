@@ -4,11 +4,32 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    setIsAuthenticated(!!token);
+    if (token) {
+      verifyToken(token)
+        .catch(() => localStorage.removeItem('authToken'))
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
   }, []);
+
+  const verifyToken = async (token) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/verify`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error();
+      setIsAuthenticated(true);
+    } catch (err) {
+      setIsAuthenticated(false);
+      throw err;
+    }
+  };
 
   const login = (token) => {
     localStorage.setItem('authToken', token);
@@ -21,7 +42,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, loading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
