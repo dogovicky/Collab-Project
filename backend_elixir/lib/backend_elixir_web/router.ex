@@ -9,7 +9,7 @@ defmodule BackendElixirWeb.Router do
     pipe_through :api
 
     # Define API routes here
-    # get "/example", ExampleController, :index
+    get "/notifications", NotificationController, :index
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
