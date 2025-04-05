@@ -1,0 +1,109 @@
+/* === Scoped SignUp Container Styling === */
+.sign-up-page .sign-up-container {
+  background-color: #1e1e1e;
+  color: #f5f5f5;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  max-width: 600px;
+  margin: 50px auto;
+  border: 1px solid #2a2d31;
+}
+
+/* === Scoped Heading Styling === */
+.sign-up-page .sign-up-container h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #0095ff;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* === Scoped Form Styling === */
+.sign-up-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* === Scoped Input Styling === */
+.sign-up-page input,
+.sign-up-page textarea,
+.sign-up-page select {
+  width: 100%;
+  padding: 14px;
+  background-color: #262626;
+  border: 1px solid #3a3a3a;
+  color: #f5f5f5;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+.sign-up-page input:focus,
+.sign-up-page textarea:focus,
+.sign-up-page select:focus {
+  border-color: #0095ff;
+  box-shadow: 0 0 6px #0095ff;
+}
+
+/* === Scoped Button Styling === */
+.sign-up-page button {
+  padding: 14px;
+  background-color: #0095ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.sign-up-page button:hover {
+  background-color: #0080e0;
+}
+
+.sign-up-page button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+/* === Scoped Step Navigation Buttons === */
+.sign-up-page .step-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sign-up-page .step-nav button {
+  background-color: #0078d4;
+}
+
+.sign-up-page .step-nav button:hover {
+  background-color: #0066bb;
+}
+
+/* === Scoped Error Messages === */
+.sign-up-page .error-message {
+  background-color: #420606;
+  color: #ff4d4d;
+  padding: 14px;
+  border-radius: 10px;
+  margin-top: 14px;
+  font-size: 15px;
+  border: 1px solid #ff4d4d;
+  text-align: center;
+}
+
+/* === Scoped Responsive Design === */
+@media (max-width: 768px) {
+  .sign-up-page .sign-up-container {
+    padding: 20px;
+  }
+}
+
+

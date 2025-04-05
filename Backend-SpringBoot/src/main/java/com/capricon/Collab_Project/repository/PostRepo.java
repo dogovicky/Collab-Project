@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,5 +50,8 @@ public interface PostRepo extends JpaRepository<Post, UUID> {
 
     @EntityGraph(attributePaths = {"comments", "likes", "reposts"})
     Optional<Post> findByAuthorIdAndId(User user, UUID id);
+
+    @Query("SELECT p FROM Post p WHERE p.label IN :labels ORDER BY p.createdAt DESC ")
+    List<Post> findPostsByLabel(@Param("labels") List<String> labels);
 
 }
