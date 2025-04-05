@@ -1,8 +1,12 @@
+// 1. Defined joinChannel, connectSocket and joinChannel in socket.js
+// 2. Changed channel name to nitifications
+
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import MessageList from '../components/MessageList';
 import MessageInput from '../components/MessageInput';
-import { connectSocket, joinChannel, fetchMessages, pushMessage } from '../utils/socket'; // Import connectSocket and joinChannel
+// import { connectSocket, joinChannel, fetchMessages, pushMessage } from '../utils/socket'; // Import connectSocket and joinChannel
+import { connectSocket, joinChannel,fetchMessages, pushMessage } from '../utils/socket'; // Import connectSocket and joinChannel
 import './CssSheets/Messages.css';
 
 const Messages = ({ userId, users }) => {
@@ -21,12 +25,15 @@ const Messages = ({ userId, users }) => {
           throw new Error('Failed to create socket connection');
         }
 
-        const { channel } = await joinChannel('room:lobby', { user_id: userId });
+        // const { channel } = await joinChannel('notifications:notifications', { user_id: userId });
+        const { channel } = await joinChannel(userId);
         currentChannel = channel;
         channelRef.current = channel;
         setConnected(true);
 
         channel.on('new_message', (payload) => {
+          //
+          console.log(payload)
           const newMessage = {
             id: payload.id,
             content: payload.message,
@@ -38,7 +45,12 @@ const Messages = ({ userId, users }) => {
           setMessages(prev => [...prev, newMessage]);
         });
 
-        const existingMessages = await fetchMessages('room:lobby', { user_id: userId });
+        // const existingMessages = await fetchMessages('notifications:notifications', { user_id: userId });
+        const existingMessages = await fetchMessages(userId);
+
+        //
+        console.log(existingMessages)
+
         setMessages(existingMessages.messages || []);
       } catch (error) {
         console.error('Channel setup failed:', error);
