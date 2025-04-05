@@ -34,6 +34,7 @@ com/capricon/Collab_Project/configuration/TransactionConfig.class
 com/capricon/Collab_Project/service/JwtService.class
 com/capricon/Collab_Project/model/UserPrincipal.class
 com/capricon/Collab_Project/dto/UserProfileDTO.class
+com/capricon/Collab_Project/controller/HomeController.class
 com/capricon/Collab_Project/model/converter/GenderConverter.class
 com/capricon/Collab_Project/configuration/EmailClientConfig.class
 com/capricon/Collab_Project/model/Comment.class
@@ -90,6 +91,7 @@ com/capricon/Collab_Project/model/Post$PostBuilder.class
 com/capricon/Collab_Project/exception/UserException.class
 com/capricon/Collab_Project/model/Message.class
 com/capricon/Collab_Project/model/Post.class
+com/capricon/Collab_Project/service/HomeService.class
 com/capricon/Collab_Project/dto/UserProfileDTO$UserProfileDTOBuilder.class
 com/capricon/Collab_Project/dto/LikeDTO.class
 com/capricon/Collab_Project/dto/ApiResponse.class
