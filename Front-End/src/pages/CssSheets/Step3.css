@@ -165,4 +165,54 @@ button:first-of-type:active {
   }
 }
 
-  
+/* File Upload Container */
+.file-upload-container {
+  background-color: #334155;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.file-requirements {
+  display: block;
+  color: #94a3b8;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+/* Multiple Select Improvements */
+select[multiple] {
+  height: 160px;
+  padding: 8px;
+}
+
+select[multiple] option {
+  padding: 8px;
+  margin: 2px 0;
+  border-radius: 4px;
+}
+
+select[multiple] option:hover {
+  background-color: #2d3748;
+}
+
+/* Button Container */
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.button-container button {
+  flex: 1;
+  max-width: 160px;
+}
+
+/* Textarea Improvements */
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './NotificationPage.css';
-import socket from '../utils/socket'; // Import the WebSocket connection
+import socket, { joinChannel } from '../utils/socket'; // Import both the socket and joinChannel
 
 const Notification = ({ notification, onClick }) => (
-  <div 
-    className={`notification ${notification.read ? 'read' : 'unread'}`} 
+  <div
+    className={`notification ${notification.read ? 'read' : 'unread'}`}
     onClick={() => onClick(notification.id)}
   >
     <p>{notification.message}</p>
@@ -15,6 +15,7 @@ const Notification = ({ notification, onClick }) => (
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
+  const [notificationChannel, setNotificationChannel] = useState(null);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -27,19 +28,32 @@ const NotificationPage = () => {
     };
 
     fetchNotifications();
-  }, []);
 
-  useEffect(() => {
-    const handleNewNotification = (payload) => {
-      console.log('Received notification:', payload);
-      setNotifications((prev) => [...prev, payload]);
+    // Setup Phoenix channel for notifications
+    const setupChannel = async () => {
+      try {
+        const userId = "123"; // Replace with actual user ID
+        const { channel } = await joinChannel(userId);
+        
+        // Listen for new notifications using Phoenix channel's "on" method
+        channel.on("new_notification", (payload) => {
+          console.log('Received notification:', payload);
+          setNotifications((prev) => [...prev, payload]);
+        });
+        
+        setNotificationChannel(channel);
+      } catch (error) {
+        console.error('Error setting up notification channel:', error);
+      }
     };
+    
+    setupChannel();
 
-    // Listen for new notifications
-    socket.on('new_notification', handleNewNotification);
-
+    // Cleanup function
     return () => {
-      socket.off('new_notification', handleNewNotification); // Cleanup listener
+      if (notificationChannel) {
+        notificationChannel.leave();
+      }
     };
   }, []);
 
@@ -57,7 +71,7 @@ const NotificationPage = () => {
   };
 
   const markAsRead = (id) => {
-    setNotifications(notifications.map(notification => 
+    setNotifications(notifications.map(notification =>
       notification.id === id ? { ...notification, read: true } : notification
     ));
   };
@@ -74,10 +88,10 @@ const NotificationPage = () => {
           <p>No notifications yet!</p>
         ) : (
           notifications.map(notification => (
-            <Notification 
-              key={notification.id} 
-              notification={notification} 
-              onClick={markAsRead} 
+            <Notification
+              key={notification.id}
+              notification={notification}
+              onClick={markAsRead}
             />
           ))
         )}

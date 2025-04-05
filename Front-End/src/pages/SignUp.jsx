@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Step1 from "./CssSheets/Step1";
 import Step2 from "./CssSheets/Step2";
 import Step3 from "./CssSheets/Step3";
@@ -7,11 +7,14 @@ import { useSignUp } from "../hooks/useSignUp";
 import { useFormValidation } from "../hooks/useFormValidation";
 import { signUp } from "../api/auth";
 import "./CssSheets/SignUp.css";
-import axios from "axios";
 
 const SignUp = () => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [apiError, setApiError] = useState(null);
+  const [apiSuccess, setApiSuccess] = useState(null);
+  const { isSubmitting, submitSignUp } = useSignUp();
+  
+  const initialFormData = {
     email: "",
     password: "",
     firstName: "",
@@ -20,88 +23,64 @@ const SignUp = () => {
     bio: "",
     institution: "",
     fieldsOfInterest: [],
-  });
-  const [errors, setErrors] = useState({});
-  const { isSubmitting, submitSignUp } = useSignUp();
-  const { validateForm } = useFormValidation(formData);
-  const [apiError, setApiError] = useState(null);
-  const [apiSuccess, setApiSuccess] = useState(null);
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: files ? files[0] : value,
-    }));
-
-    // Dynamically clear errors for the field being updated
-    if (errors[name]) {
-      setErrors((prevErrors) => {
-        const { [name]: removedError, ...rest } = prevErrors;
-        return rest;
-      });
-    }
   };
+
+  const { 
+    formData, 
+    errors, 
+    setErrors, 
+    handleChange, 
+    validateForm,
+    isCheckingEmail 
+  } = useFormValidation(initialFormData);
 
   const nextStep = async (e) => {
     e.preventDefault();
     setApiError(null);
-    let currentStepValid = true;
-    let newErrors = {};
 
-    if (step === 1) {
-      try {
-        // Call API to check if email exists
-        const response = await axios.post('/api/check-email', { email: formData.email });
-        if (response.data.exists) {
-          newErrors.email = 'Email already exists';
-          currentStepValid = false;
-        }
-      } catch (error) {
-        setApiError(error.response?.data?.message || 'An error occurred');
-        currentStepValid = false;
-      }
-    }
-
-    // Validate current step
-    if (step === 1) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      
-      if (!emailRegex.test(formData.email)) {
-        newErrors.email = 'Please enter a valid email';
-        currentStepValid = false;
-      }
-      if (!passwordRegex.test(formData.password)) {
-        newErrors.password = 'Please enter a valid password';
-        currentStepValid = false;
-      }
-    }
-
-    if (!currentStepValid) {
-      setErrors(newErrors);
+    if (isCheckingEmail) {
+      setApiError('Please wait while we verify your email');
       return;
     }
 
-    // If validation passes, clear errors and move to next step
-    setErrors({});
-    setStep(prevStep => prevStep + 1);
+    let fieldsToValidate = [];
+    switch (step) {
+      case 1:
+        fieldsToValidate = ['email', 'password'];
+        break;
+      case 2:
+        fieldsToValidate = ['firstName', 'lastName'];
+        break;
+      case 3:
+        fieldsToValidate = ['profilePicture', 'bio', 'institution', 'fieldsOfInterest'];
+        break;
+      default:
+        fieldsToValidate = Object.keys(formData);
+    }
+
+    try {
+      const validationErrors = await validateForm(fieldsToValidate);
+      if (Object.keys(validationErrors).length === 0) {
+        setStep(prevStep => prevStep + 1);
+      }
+    } catch (error) {
+      setApiError(error.message || 'An error occurred');
+    }
   };
 
   const prevStep = () => setStep((prev) => prev - 1);
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form behavior
+    e.preventDefault();
     setApiError(null);
+    
     if (step === 4) {
-      const validationErrors = validateForm();
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
-      }
       try {
-        const response = await signUp(formData); // Use the signUp API here
-        setApiSuccess(response.data.message || 'Signup successful! Please check your email for verification.');
+        const validationErrors = await validateForm();
+        if (Object.keys(validationErrors).length === 0) {
+          const response = await signUp(formData);
+          setApiSuccess(response.data.message || 'Signup successful! Please check your email for verification.');
+        }
       } catch (error) {
         setApiError(error.response?.data?.message || 'Signup failed. Please try again.');
       }
@@ -121,6 +100,7 @@ const SignUp = () => {
               handleChange={handleChange}
               nextStep={nextStep}
               errors={errors}
+              isCheckingEmail={isCheckingEmail}
             />
           )}
           {step === 2 && (

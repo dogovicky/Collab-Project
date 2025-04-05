@@ -1,5 +1,6 @@
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import './Step3.css';
+import { FILE_SIZE_LIMIT, ACCEPTED_FILE_TYPES } from '../../utils/fileValidation';
 
 const Step3 = ({ formData, handleChange, nextStep, prevStep }) => {
     const fieldsOfInterest = [
@@ -26,7 +27,19 @@ const Step3 = ({ formData, handleChange, nextStep, prevStep }) => {
   
     return (
       <div>
-        <input type="file" name="profilePicture" accept="image/*" onChange={handleChange} />
+        <div className="file-upload-container">
+          <input 
+            type="file" 
+            name="profilePicture" 
+            accept={ACCEPTED_FILE_TYPES.join(',')}
+            onChange={handleChange}
+          />
+          <small className="file-requirements">
+            Accepted formats: {ACCEPTED_FILE_TYPES.map(type => type.split('/')[1]).join(', ')}
+            <br />
+            Maximum size: {FILE_SIZE_LIMIT / (1024 * 1024)}MB
+          </small>
+        </div>
   
         <textarea
           name="bio"
@@ -56,12 +69,14 @@ const Step3 = ({ formData, handleChange, nextStep, prevStep }) => {
           ))}
         </select>
   
-        <button onClick={prevStep}>
-          <FaArrowLeft /> Back
-        </button>
-        <button onClick={nextStep}>
-          Next <FaArrowRight />
-        </button>
+        <div className="button-container">
+          <button onClick={prevStep}>
+            <FaArrowLeft /> Back
+          </button>
+          <button onClick={nextStep}>
+            Next <FaArrowRight />
+          </button>
+        </div>
       </div>
     );
   };

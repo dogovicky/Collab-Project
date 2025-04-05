@@ -1,33 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { fetchMessages } from '../utils/socket'; // Import fetchMessages from socket utility
+import React from 'react';
 import './MessageInput.css';
 
-const MessageInput = ({ userId, users, onSend }) => {
-  const [messages, setMessages] = useState([]);
-
-  useEffect(() => {
-    // Fetch messages using the socket
-    fetchMessages('room:lobby')
-      .then((data) => setMessages(data))
-      .catch((error) => console.error('Error fetching messages:', error));
-  }, []);
+const MessageInput = ({ onSend }) => {
+  const handleSubmit = (message) => {
+    if (message.trim()) {
+      onSend(message.trim());
+    }
+  };
 
   return (
     <div className="message-input">
-      <div className="message-list">
-        {messages.map((message, index) => (
-          <div key={index} className="message-item">
-            <strong>{message.senderName}:</strong> {message.text}
-          </div>
-        ))}
-      </div>
       <input
         type="text"
         className="message-input__field"
         placeholder="Type a message..."
         onKeyPress={(e) => {
-          if (e.key === 'Enter' && e.target.value.trim()) {
-            onSend(e.target.value.trim());
+          if (e.key === 'Enter') {
+            handleSubmit(e.target.value);
             e.target.value = '';
           }
         }}
@@ -35,11 +24,9 @@ const MessageInput = ({ userId, users, onSend }) => {
       <button
         className="message-input__button"
         onClick={() => {
-          const input = document.querySelector('input[type="text"]');
-          if (input.value.trim()) {
-            onSend(input.value.trim());
-            input.value = '';
-          }
+          const input = document.querySelector('.message-input__field');
+          handleSubmit(input.value);
+          input.value = '';
         }}
       >
         Send

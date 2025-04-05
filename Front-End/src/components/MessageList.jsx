@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import './MessageList.css';
+import { standardizeMessage } from '../utils/messageFormatter';
 
 const MessageList = ({ messages, userId, users }) => {
   const messagesEndRef = useRef(null);
@@ -17,20 +18,11 @@ const MessageList = ({ messages, userId, users }) => {
     [users]
   );
 
-  const formatMessage = (msg) => ({
-    id: msg.id || msg._id,
-    content: msg.content || msg.message,
-    senderId: msg.sender_id || msg.senderId,
-    timestamp: msg.inserted_at || msg.timestamp,
-    senderName: msg.sender_name || getUserInfo(msg.senderId)?.name || 'Unknown',
-    avatar: msg.sender_avatar || getUserInfo(msg.senderId)?.avatar || '/default-avatar.png'
-  });
-
   return (
     <div className="flex flex-col gap-2 p-4 h-[500px] overflow-y-auto bg-gray-100 rounded-lg shadow-inner">
       {messages.map((msg) => {
-        const formattedMsg = formatMessage(msg);
-        const isSentByCurrentUser = formattedMsg.senderId === userId;
+        const formattedMsg = standardizeMessage(msg, userId);
+        const isSentByCurrentUser = formattedMsg.isSender;
 
         return (
           <div
@@ -42,7 +34,7 @@ const MessageList = ({ messages, userId, users }) => {
             {/* Show avatar only for received messages */}
             {!isSentByCurrentUser && (
               <img
-                src={formattedMsg.avatar} // Fallback avatar
+                src={formattedMsg.senderAvatar}
                 alt={formattedMsg.senderName}
                 className="w-8 h-8 rounded-full"
               />
@@ -69,7 +61,7 @@ const MessageList = ({ messages, userId, users }) => {
             {/* Show avatar for sent messages */}
             {isSentByCurrentUser && (
               <img
-                src={formattedMsg.avatar}
+                src={formattedMsg.senderAvatar}
                 alt={formattedMsg.senderName}
                 className="w-8 h-8 rounded-full"
               />

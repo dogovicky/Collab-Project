@@ -1,34 +1,67 @@
 import './Step4.css';
 
 const Step4 = ({ formData, handleSubmit, prevStep, isSubmitting, errors }) => {
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    console.log('Submitting form data:', formData); // Debug log
+    try {
+      await handleSubmit(e);
+    } catch (error) {
+      console.error('Submission error:', error); // Debug log
+    }
+  };
+
   return (
     <div className="step-container">
       <p>Confirm your details before submitting:</p>
-      <pre>{JSON.stringify(formData, null, 2)}</pre>
+      <div className="form-summary">
+        {Object.entries(formData).map(([key, value]) => (
+          <div key={key} className="summary-item">
+            <strong>{key}:</strong>{' '}
+            {key === 'profilePicture' 
+              ? (value ? value.name : 'No file selected')
+              : Array.isArray(value)
+                ? value.join(', ')
+                : value.toString()}
+          </div>
+        ))}
+      </div>
 
-      {errors.profilePicture && (
-        <p className="error">
-          {errors.profilePicture} (Upload a valid image file, such as .jpg or .png.)
-        </p>
-      )}
-      {errors.fieldsOfInterest && (
-        <p className="error">
-          {errors.fieldsOfInterest} (Select at least one field of interest from the list.)
-        </p>
+      {/* Display any validation errors */}
+      {Object.keys(errors).length > 0 && (
+        <div className="error-summary">
+          <p>Please correct the following errors:</p>
+          {Object.entries(errors).map(([key, error]) => (
+            <p key={key} className="error">{error}</p>
+          ))}
+        </div>
       )}
 
       <div className="button-group">
-        <button onClick={prevStep}>Back</button>
+        <button type="button" onClick={prevStep} disabled={isSubmitting}>
+          Back
+        </button>
         <button
           type="submit"
-          onClick={(e) => {
-            if (!isSubmitting) handleSubmit(e);
-          }}
-          disabled={isSubmitting}
+          onClick={handleFormSubmit}
+          disabled={isSubmitting || Object.keys(errors).length > 0}
         >
-          {isSubmitting ? "Submitting..." : "Submit"}
+          {isSubmitting ? (
+            <div className="submit-loading">
+              <span className="loading-spinner"></span>
+              Submitting...
+            </div>
+          ) : (
+            "Submit"
+          )}
         </button>
       </div>
+
+      {isSubmitting && (
+        <div className="submission-status">
+          Processing your registration...
+        </div>
+      )}
     </div>
   );
 };

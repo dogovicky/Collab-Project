@@ -106,4 +106,53 @@ button[type="submit"]:disabled {
   }
 }
 
-  
+/* === Form Summary === */
+.form-summary {
+  background: #2a374a;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.summary-item {
+  margin: 8px 0;
+  padding: 8px;
+  border-bottom: 1px solid #3a4a61;
+}
+
+/* === Error Summary === */
+.error-summary {
+  background: rgba(255, 0, 0, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+/* === Submit Loading === */
+.submit-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.submission-status {
+  text-align: center;
+  margin-top: 16px;
+  color: #64b5f6;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

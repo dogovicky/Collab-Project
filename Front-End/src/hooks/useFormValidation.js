@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import debounce from 'lodash/debounce';
+import { validateFileSize, validateFileType } from '../utils/fileValidation';
 
 export const useFormValidation = (initialState) => {
   const [formData, setFormData] = useState(initialState);
   const [errors, setErrors] = useState({});
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   const formatFieldName = (field) => {
     return field
@@ -17,34 +21,90 @@ export const useFormValidation = (initialState) => {
   };
 
   const validatePassword = (password) => {
-    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return re.test(password);
+    const requirements = {
+      minLength: password.length >= 8,
+      hasUpperCase: /[A-Z]/.test(password),
+      hasLowerCase: /[a-z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    };
+
+    const isValid = Object.values(requirements).every(Boolean);
+
+    return {
+      isValid,
+      requirements,
+      message: !isValid
+        ? `Password must contain at least:
+          - 8 characters
+          - One uppercase letter
+          - One lowercase letter
+          - One number
+          - One special character`
+        : ''
+    };
   };
 
-  const validateForm = (fieldsToValidate = Object.keys(formData)) => {
+  const checkEmailExists = async (email) => {
+    try {
+      const response = await axios.post('/api/check-email', { email });
+      return response.data.exists;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error checking email');
+    }
+  };
+
+  const debouncedEmailCheck = useCallback(
+    debounce(async (email) => {
+      if (!email || !validateEmail(email)) return;
+      
+      setIsCheckingEmail(true);
+      try {
+        const exists = await checkEmailExists(email);
+        if (exists) {
+          setErrors(prev => ({
+            ...prev,
+            email: "This email is already registered"
+          }));
+        }
+      } catch (error) {
+        console.error('Email check failed:', error);
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    }, 500),
+    []
+  );
+
+  const validateForm = useCallback(async (fieldsToValidate = Object.keys(formData)) => {
     const newErrors = {};
     
-    fieldsToValidate.forEach((field) => {
+    for (const field of fieldsToValidate) {
       const value = formData[field];
       const fieldName = formatFieldName(field);
 
-      // Required field validation
-      if (!value?.toString().trim()) {
-        newErrors[field] = `${fieldName} is required`;
-        return;
+      // Skip validation for optional fields if they're empty
+      if (!value && !['email', 'password'].includes(field)) {
+        continue;
       }
 
-      // Field-specific validations
+      // Required field validation
+      if (['email', 'password'].includes(field) && !value?.toString().trim()) {
+        newErrors[field] = `${fieldName} is required`;
+        continue;
+      }
+
       switch(field) {
         case 'email':
           if (!validateEmail(value)) {
-            newErrors.email = "Please enter a valid email address";
+            newErrors.email = `Please enter a valid email address`;
           }
           break;
           
         case 'password':
-          if (!validatePassword(value)) {
-            newErrors.password = "Password must be at least 8 characters and include uppercase, lowercase, number and special character";
+          const passwordValidation = validatePassword(value);
+          if (!passwordValidation.isValid) {
+            newErrors.password = passwordValidation.message;
           }
           break;
 
@@ -56,49 +116,63 @@ export const useFormValidation = (initialState) => {
           break;
 
         case 'profilePicture':
-          if (!(value instanceof File)) {
-            newErrors.profilePicture = "Please upload a valid profile picture (e.g., .jpg, .png).";
+          if (value instanceof File) {
+            const sizeError = validateFileSize(value);
+            if (sizeError) {
+              newErrors.profilePicture = sizeError;
+              break;
+            }
+            
+            const typeError = validateFileType(value);
+            if (typeError) {
+              newErrors.profilePicture = typeError;
+              break;
+            }
+          } else if (value !== null) {
+            newErrors.profilePicture = `Please upload a valid image file`;
           }
           break;
 
         case 'fieldsOfInterest':
           if (!Array.isArray(value) || value.length === 0) {
-            newErrors.fieldsOfInterest = "Please select at least one field of interest.";
+            newErrors.fieldsOfInterest = `Please select at least one field of interest.`;
           }
           break;
 
         default:
           break;
       }
-    });
+    }
 
-    setErrors(newErrors); // Ensure errors are updated in state
+    setErrors(newErrors);
     return newErrors;
-  };
+  }, [formData]);
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value, type, files } = e.target;
     const processedValue = type === 'file' ? files[0] : value;
 
     setFormData((prev) => ({ ...prev, [name]: processedValue }));
 
-    // Dynamically clear errors for the field being updated
-    if (errors[name]) {
-      setErrors((prevErrors) => {
-        const { [name]: removedError, ...rest } = prevErrors;
-        return rest;
-      });
+    // Clear error for the changed field
+    setErrors(prev => {
+      const { [name]: removed, ...rest } = prev;
+      return rest;
+    });
+
+    // Trigger email check only when email field changes and has a value
+    if (name === 'email' && value) {
+      debouncedEmailCheck(value);
     }
-  };
+  }, [debouncedEmailCheck]);
 
   // Add useEffect to revalidate when formData changes
   useEffect(() => {
     const fieldsWithErrors = Object.keys(errors);
     if (fieldsWithErrors.length > 0) {
-      const updatedErrors = validateForm(fieldsWithErrors);
-      setErrors(updatedErrors);
+      validateForm(fieldsWithErrors);
     }
-  }, [formData]);
+  }, [formData, validateForm, errors]);
 
   return { 
     formData, 
@@ -106,6 +180,7 @@ export const useFormValidation = (initialState) => {
     setErrors, 
     handleChange, 
     validateForm,
-    setFormData // Optional: Add if you need direct access
+    isCheckingEmail,
+    setFormData 
   };
 };

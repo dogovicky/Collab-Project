@@ -1,12 +1,12 @@
 // 1. Defined joinChannel, connectSocket and joinChannel in socket.js
-// 2. Changed channel name to nitifications
+// 2. Changed channel name to notifications
 
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import MessageList from '../components/MessageList';
 import MessageInput from '../components/MessageInput';
-// import { connectSocket, joinChannel, fetchMessages, pushMessage } from '../utils/socket'; // Import connectSocket and joinChannel
-import { connectSocket, joinChannel,fetchMessages, pushMessage } from '../utils/socket'; // Import connectSocket and joinChannel
+import { connectSocket, joinChannel, fetchMessages, pushMessage } from '../utils/socket'; // Import connectSocket and joinChannel
+import { standardizeMessage } from '../utils/messageFormatter';
 import './CssSheets/Messages.css';
 
 const Messages = ({ userId, users }) => {
@@ -25,30 +25,20 @@ const Messages = ({ userId, users }) => {
           throw new Error('Failed to create socket connection');
         }
 
-        // const { channel } = await joinChannel('notifications:notifications', { user_id: userId });
         const { channel } = await joinChannel(userId);
         currentChannel = channel;
         channelRef.current = channel;
         setConnected(true);
 
         channel.on('new_message', (payload) => {
-          //
-          console.log(payload)
-          const newMessage = {
-            id: payload.id,
-            content: payload.message,
-            sender_id: payload.sender_id,
-            sender_name: payload.sender_name,
-            sender_avatar: payload.sender_avatar,
-            inserted_at: payload.inserted_at
-          };
+          console.log('Raw message payload received:', payload);
+          const newMessage = standardizeMessage(payload, userId);
+          console.log('Standardized message:', newMessage);
           setMessages(prev => [...prev, newMessage]);
         });
 
-        // const existingMessages = await fetchMessages('notifications:notifications', { user_id: userId });
         const existingMessages = await fetchMessages(userId);
 
-        //
         console.log(existingMessages)
 
         setMessages(existingMessages.messages || []);
@@ -75,14 +65,21 @@ const Messages = ({ userId, users }) => {
 
   // Handle sending a message
   const handleSendMessage = async (content) => {
-    if (!content.trim() || !channelRef.current) return;
+    if (!content.trim() || !channelRef.current) {
+      toast.error('Cannot send empty message or no active connection');
+      return;
+    }
     
     try {
-      await pushMessage(channelRef.current, 'new_message', {
+      const response = await pushMessage(channelRef.current, 'new_message', {
         message: content,
         sender_id: userId,
-        room_id: 'lobby'
+        room_id: 'notifications'
       });
+      
+      if (!response) {
+        throw new Error('No response from server');
+      }
     } catch (error) {
       console.error('Failed to send message:', error);
       toast.error('Failed to send message. Please try again.');
