@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAuth } from "../context/AuthContext";
-import { loginUser } from "../api/authA";
+import { useAuth } from "../../context/AuthContext";
+import { loginUser } from "../../api/authA";
 import "./CssSheets/SignIn.css";
-import Header from "../components/header";
+import Header from "../../components/header";
 
 const SignIn = () => {
   const navigate = useNavigate(); // Hook to programmatically navigate between routes
@@ -51,15 +51,11 @@ const SignIn = () => {
     try {
       const response = await loginUser(formData); // Call the API to log in the user
 
-      if (response.status !== 200) {
-        throw new Error("Login failed. Please try again."); // Handle unsuccessful login
-      }
-
-      if (!response) {
+      if (!response.token) {
         throw new Error("Authentication failed. Invalid credentials."); // Handle invalid credentials
       }
 
-      login(response); // Save the token using the login function from context
+      login(response.token); // Save the token using the login function from context
       toast.success("Logged in successfully!");
       navigate("/home"); // Redirect to the home page
     } catch (error) {

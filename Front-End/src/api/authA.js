@@ -17,8 +17,14 @@ api.interceptors.request.use((config) => {
 
 export const loginUser = async (credentials) => {
   try {
-    const response = await api.post('/auth/login', credentials);
-    return response.data;
+    const response = await api.post('http://localhost:8080/auth/login', credentials);
+    if(response.status == 200) {
+      console.log(response);
+      return response.data;
+    } else {
+      throw new Error("Login failed");
+    }
+    
   } catch (error) {
     const errorMessage = error.response?.data?.message || error.message || "Login failed";
     console.error("Login failed:", errorMessage);
