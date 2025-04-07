@@ -13,9 +13,10 @@ export const signUp = async (formData) => {
     }
   });
 
-  const response = await axios.post("https://localhost:8080/auth/signup", formDataToSend, {
-    headers: { "Content-Type": "multipart/form-data" },
+  const response = await axios.post("http://localhost:8080/auth/signup", formDataToSend, {
+    // headers: { "Content-Type": "multipart/form-data" },
   });
+  console.log(response);
 
-  return response.data;
+  return response;
 };
