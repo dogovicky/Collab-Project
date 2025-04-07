@@ -10,33 +10,33 @@ import { standardizeMessage } from '../utils/messageFormatter';
 import './CssSheets/Messages.css';
 
 const Messages = ({ userId, users }) => {
-  const [messages, setMessages] = useState([]);
-  const [connected, setConnected] = useState(false);
-  const channelRef = useRef(null);
+  const [messages, setMessages] = useState([]); //all messages will be shown
+  const [connected, setConnected] = useState(false); //are we connected to the socket
+  const channelRef = useRef(null); //hold the active chat room
 
   useEffect(() => {
     let currentChannel;
     let reconnectTimer;
-
+//async function to set up the channel. it will be called when the component mounts
     const setupChannel = async () => {
       try {
         const socket = connectSocket();
         if (!socket) {
           throw new Error('Failed to create socket connection');
         }
-
+//joins the channel for current user
         const { channel } = await joinChannel(userId);
         currentChannel = channel;
-        channelRef.current = channel;
+        channelRef.current = channel;// Store the channel for reference for later use
         setConnected(true);
-
+//this listens for new incoming messages from the server and adds them to the messages state.We use standardizeMessage to clean it up before using it.
         channel.on('new_message', (payload) => {
           console.log('Raw message payload received:', payload);
           const newMessage = standardizeMessage(payload, userId);
           console.log('Standardized message:', newMessage);
           setMessages(prev => [...prev, newMessage]);
         });
-
+// pulls past messages from the server
         const existingMessages = await fetchMessages(userId);
 
         console.log(existingMessages)
@@ -69,7 +69,7 @@ const Messages = ({ userId, users }) => {
       toast.error('Cannot send empty message or no active connection');
       return;
     }
-    
+    //sends the message to the server
     try {
       const response = await pushMessage(channelRef.current, 'new_message', {
         message: content,

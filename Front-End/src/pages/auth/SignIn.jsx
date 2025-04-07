@@ -37,16 +37,16 @@ const SignIn = () => {
 
   // Handles form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault(); // stops page from reloading
     const formErrors = validateForm(); // Validate the form inputs
 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors); // Set validation errors if any
-      toast.error("Please fill in all the required fields"); // Show error notification
+      toast.error("Please fill in all the required fields");
       return;
     }
 
-    setIsSubmitting(true); // Indicate that the form is being submitted
+    setIsSubmitting(true);
 
     try {
       const response = await loginUser(formData); // Call the API to log in the user

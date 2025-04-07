@@ -39,7 +39,9 @@ const ProfilePage = () => {
     <div className="profile-page">
       <ProfileHeader user={user} />
       <ProfileStats stats={user.stats} />
-      <button onClick={() => setIsEditing(true)}>Edit Profile</button>
+      <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>
+        Edit Profile
+      </button>
       {isEditing && (
         <EditProfileModal
           user={user}
@@ -50,14 +52,26 @@ const ProfilePage = () => {
       <div className="profile-posts">
         <h2>Posts</h2>
         {user.posts.map((post) => (
-          <Post
-            key={post.id}
-            avatarUrl={user.avatar}
-            username={user.username}
-            content={post.content}
-            initialComments={post.comments}
-            postTime={post.postTime}
-          />
+          <div key={post.id} className="post">
+            <div className="post-header">
+              <img src={user.avatar} alt={user.username} className="avatar" />
+              <div className="post-info">
+                <h3 className="username">{user.username}</h3>
+                <span className="post-time">{post.postTime}</span>
+              </div>
+            </div>
+            <p className="post-content">{post.content}</p>
+            {post.comments && (
+              <div className="comments">
+                {post.comments.map((comment, index) => (
+                  <div key={index} className="comment">
+                    <div className="comment-user">{comment.username}</div>
+                    <div className="comment-content">{comment.content}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         ))}
       </div>
       <div className="profile-reposts">

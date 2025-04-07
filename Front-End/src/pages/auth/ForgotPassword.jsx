@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './CssSheets/ForgotPassword.css';
-import { requestResetCode, updatePassword } from "../api/authA"; // Corrected import path
+import { requestResetCode, updatePassword } from "../api/authA";
 
 const ForgotPassword = () => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1);//track which step(1=enter email, 2=entercode &new password)
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -12,7 +12,7 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-
+// send reset code
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -28,7 +28,7 @@ const ForgotPassword = () => {
       setLoading(false);
     }
   };
-
+//enter code and new password
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
@@ -41,7 +41,7 @@ const ForgotPassword = () => {
     try {
       const response = await resetPassword({ code, newPassword });
       setMessage(response.message || 'Your password has been successfully reset.');
-      setStep(1);
+      setStep(1);//go back to step1 after succesful reset
       setEmail('');
       setCode('');
       setNewPassword('');
@@ -147,7 +147,7 @@ const sendResetCode = async (data) => {
     throw new Error(error.message || "Failed to send reset code.");
   }
 };
-
+//send the new password to the API
 const resetPassword = async (data) => {
   try {
     const response = await updatePassword(data); // Call API
