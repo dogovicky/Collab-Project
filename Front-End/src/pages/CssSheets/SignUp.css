@@ -1,4 +1,4 @@
-/* === Scoped SignUp Container Styling === */
+/* === Scoped SignUp Container Styling === 
 .sign-up-page .sign-up-container {
   background-color: #1e1e1e;
   color: #f5f5f5;
@@ -10,7 +10,7 @@
   border: 1px solid #2a2d31;
 }
 
-/* === Scoped Heading Styling === */
+/* === Scoped Heading Styling === 
 .sign-up-page .sign-up-container h2 {
   font-size: 24px;
   font-weight: 700;
@@ -21,14 +21,14 @@
   letter-spacing: 1px;
 }
 
-/* === Scoped Form Styling === */
+/* === Scoped Form Styling === 
 .sign-up-page form {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-/* === Scoped Input Styling === */
+/* === Scoped Input Styling === 
 .sign-up-page input,
 .sign-up-page textarea,
 .sign-up-page select {
@@ -50,7 +50,7 @@
   box-shadow: 0 0 6px #0095ff;
 }
 
-/* === Scoped Button Styling === */
+/* === Scoped Button Styling === 
 .sign-up-page button {
   padding: 14px;
   background-color: #0095ff;
@@ -72,7 +72,7 @@
   cursor: not-allowed;
 }
 
-/* === Scoped Step Navigation Buttons === */
+/* === Scoped Step Navigation Buttons === 
 .sign-up-page .step-nav {
   display: flex;
   justify-content: space-between;
@@ -87,7 +87,7 @@
   background-color: #0066bb;
 }
 
-/* === Scoped Error Messages === */
+/* === Scoped Error Messages === 
 .sign-up-page .error-message {
   background-color: #420606;
   color: #ff4d4d;
@@ -99,7 +99,7 @@
   text-align: center;
 }
 
-/* === Scoped Responsive Design === */
+/* === Scoped Responsive Design === 
 @media (max-width: 768px) {
   .sign-up-page .sign-up-container {
     padding: 20px;
@@ -124,4 +124,65 @@
   text-align: center;
 }
 
+*/
 
+
+
+.signup-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e293b, #0f172a); 
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.header {
+  width: 100%;
+  text-align: center;
+  margin: 20px;
+}
+
+.header h2 {
+  font-size: 1.5em;
+  color: #f2f2f2;
+}
+
+.form-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-container form {
+  width: 60%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  position: relative;
+  padding: 30px;
+  border-radius: 5px;
+}
+
+form div {
+  margin-bottom: 15px;
+}
+
+.input-container {
+  display: grid;
+  grid-template-columns: 4fr 4fr;
+  gap: 10px;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: 5fr 4fr 3fr;
+  gap: 10px;
+}

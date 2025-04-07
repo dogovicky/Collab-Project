@@ -42,7 +42,7 @@ public class Attachment {
     private String fileUrl;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "file_type", columnDefinition = "attachmentType")
+    //@Column(name = "file_type", columnDefinition = "attachmentType")
     private AttachmentType fileType;
 
     @CreationTimestamp

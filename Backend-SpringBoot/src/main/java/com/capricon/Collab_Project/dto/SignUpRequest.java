@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +18,10 @@ import java.util.List;
 public class SignUpRequest {
 
     @NotBlank(message = "Full name is required")
-    private String fullName;
+    private String firstName;
+
+    @NotBlank(message = "Please input your last name")
+    private String lastName;
 
     @NotBlank(message = "Username is required")
     private String username;
@@ -32,11 +36,13 @@ public class SignUpRequest {
                     " one number and must not be less than 8 characters")
     private String password;
 
-    @NotBlank(message = "Phone number is required")
+    //@NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
-    @NotNull(message = "Date of birth cannot be null")
+    //@NotNull(message = "Date of birth cannot be null")
     private LocalDate dateOfBirth;
+
+    //private MultipartFile profilePic;
 
     private String gender;
 

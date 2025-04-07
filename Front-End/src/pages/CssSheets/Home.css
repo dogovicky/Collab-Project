@@ -1,5 +1,5 @@
 /* === Global Colors === */
-.primary-color {
+/* .primary-color {
   color: #0095ff;
 }
 
@@ -23,7 +23,7 @@
   border-color: #466b88;
 }
 
-/* === Container Styling === */
+/* === Container Styling === 
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -82,7 +82,7 @@ body {
   color: #a1b1c2;
 }
 
-/* === Navigation Bar Styling === */
+/* === Navigation Bar Styling === 
 .home-nav {
   display: flex;
   justify-content: space-between;
@@ -112,7 +112,7 @@ body {
   gap: 16px;
 }
 
-/* === Home Content Styling === */
+/* === Home Content Styling === 
 .home-content {
   display: flex;
   flex: 1;
@@ -121,11 +121,11 @@ body {
   overflow-y: auto;
 }
 
-/* === Main Section Styling === */
+/* === Main Section Styling === 
 .home-main {
   flex: 3;
   background-color: #1f3648;
-  padding: 0; /* Remove extra padding to align with post-container */
+  padding: 0; /* Remove extra padding to align with post-container 
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
@@ -138,7 +138,7 @@ body {
   margin-bottom: 16px;
 }
 
-/* === Sidebar Styling === */
+/* === Sidebar Styling === 
 .sidebar {
   flex: 1;
   background-color: #223647;
@@ -148,7 +148,7 @@ body {
   max-width: 250px;
 }
 
-/* === SearchBar Styling === */
+/* === SearchBar Styling === 
 .search-bar {
   display: flex;
   align-items: center;
@@ -168,7 +168,7 @@ body {
   color: #f0f0f0;
 }
 
-/* === Responsive Design === */
+/* === Responsive Design === 
 @media (max-width: 768px) {
   .home-content {
     flex-direction: column;
@@ -182,7 +182,7 @@ body {
   .home-main {
     width: 100%;
   }
-}
+} */
 
 
 
