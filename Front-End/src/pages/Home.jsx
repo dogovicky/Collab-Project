@@ -20,16 +20,7 @@ const Home = () => {
     try {
       const API_URL = `http://localhost:8080/?username=${username}`;
       console.log(username);
-      // const response = await fetch(
-      //   `http://localhost:8080/?username=${username}`,
-      //   {
-      //     method: "GET",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Authorization: `Bearer ${localStorage.getItem("token")}`,
-      //     },
-      //   }
-      // ).then((res) => res.json());
+      
       const response = await axios.get(API_URL, {
         headers: {
           "Content-Type": "application/json",

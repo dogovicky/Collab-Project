@@ -1,188 +1,63 @@
-/* === Global Colors === */
-/* .primary-color {
-  color: #0095ff;
-}
-
-.secondary-color {
-  color: #3b5b75;
-}
-
-.hover-bg-color {
-  background-color: #3d627f;
-}
-
-.text-color {
-  color: #f0f0f0;
-}
-
-.muted-color {
-  color: #a1b1c2;
-}
-
-.border-color {
-  border-color: #466b88;
-}
-
-/* === Container Styling === 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #1e1e1e;
-  color: #f0f0f0;
-}
-
 .home-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background-color: #1e1e1e;
-  color: #f0f0f0;
+  min-height: 100vh;
 }
 
-.home-container .nav-links button {
-  padding: 8px 16px;
-  background-color: #0095ff;
-  color: #ffffff;
-  border: none;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.home-container .nav-links button:hover {
-  background-color: #0080e0;
-}
-
-.home-container .sidebar-button {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 8px;
-  background-color: transparent;
-  color: #f0f0f0;
-  border: 1px solid #2a2d31;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.home-container .sidebar-button:hover {
-  background-color: #3d627f;
-  color: #ffffff;
-}
-
-.home-container .search-bar button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  color: #a1b1c2;
-}
-
-/* === Navigation Bar Styling === 
 .home-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 24px;
+  padding: 1rem 2rem;
   background-color: #1f3648;
-  border-bottom: 1px solid #2a2d31;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 100;
 }
 
 .logo {
-  font-size: 24px;
-  font-weight: 700;
-  background: linear-gradient(90deg, #0095ff, #0080e0);
+  font-size: 1.8rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #0095ff, #00c8ff);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
 }
 
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-/* === Home Content Styling === 
 .home-content {
   display: flex;
   flex: 1;
-  padding: 16px;
-  gap: 16px;
-  overflow-y: auto;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: #1e1e1e;
 }
 
-/* === Main Section Styling === 
 .home-main {
-  flex: 3;
+  flex: 1;
+  padding: 2rem;
   background-color: #1f3648;
-  padding: 0; /* Remove extra padding to align with post-container 
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .home-main h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #f0f0f0;
-  margin-bottom: 16px;
-}
-
-/* === Sidebar Styling === 
-.sidebar {
-  flex: 1;
-  background-color: #223647;
-  padding: 16px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  max-width: 250px;
-}
-
-/* === SearchBar Styling === 
-.search-bar {
-  display: flex;
-  align-items: center;
-  background-color: #2a4b61;
-  padding: 8px 12px;
-  border-radius: 20px;
-  border: 1px solid #2a2d31;
-  width: 250px;
-}
-
-.search-bar input {
-  border: none;
-  background: transparent;
-  outline: none;
-  width: 100%;
-  font-size: 14px;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
   color: #f0f0f0;
 }
 
-/* === Responsive Design === 
 @media (max-width: 768px) {
   .home-content {
     flex-direction: column;
+    padding: 1rem;
   }
-
-  .sidebar {
-    max-width: 100%;
-    margin-bottom: 16px;
-  }
-
+  
   .home-main {
-    width: 100%;
+    padding: 1rem;
   }
-} */
+}
+
 
 
 
