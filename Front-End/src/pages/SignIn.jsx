@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { loginUser } from "../api/authA";
 import "./CssSheets/SignIn.css";
 import Header from "../components/header";
+import axios from "axios";
 
 const SignIn = () => {
   const navigate = useNavigate(); // Hook to programmatically navigate between routes
@@ -49,9 +50,14 @@ const SignIn = () => {
     setIsSubmitting(true); // Indicate that the form is being submitted
 
     try {
-      const response = await loginUser(formData); // Call the API to log in the user
+      const API_URL = "http://localhost:8080/auth/login"; // API endpoint for login
+      const response = await axios.post(API_URL, formData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-      if (response.status !== 200) {
+      if (response.data.status !== 200) {
         throw new Error("Login failed. Please try again."); // Handle unsuccessful login
       }
 
@@ -59,7 +65,9 @@ const SignIn = () => {
         throw new Error("Authentication failed. Invalid credentials."); // Handle invalid credentials
       }
 
-      login(response); // Save the token using the login function from context
+      console.log(response);
+      login(response.data.data); // Save the token using the login function from context
+      console.log(response.data.data);
       toast.success("Logged in successfully!");
       navigate("/home"); // Redirect to the home page
     } catch (error) {

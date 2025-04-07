@@ -6,7 +6,9 @@ import com.capricon.Collab_Project.dto.ValidationRequest;
 import com.capricon.Collab_Project.exception.BusinessException;
 import com.capricon.Collab_Project.exception.UserException;
 import com.capricon.Collab_Project.exception.ValidationException;
+import com.capricon.Collab_Project.model.Attachment;
 import com.capricon.Collab_Project.model.User;
+import com.capricon.Collab_Project.model.enums.AttachmentType;
 import com.capricon.Collab_Project.model.enums.Gender;
 import com.capricon.Collab_Project.repository.UserRepo;
 import jakarta.validation.ConstraintViolation;
@@ -19,11 +21,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
@@ -41,6 +42,7 @@ public class SignUpService {
     private final Executor executor;
     private final RabbitMQPublisher publisher;
     private final TransactionTemplate transactionTemplate;
+    private final CloudinaryService cloudinaryService;
 
     private void validateRequest(SignUpRequest request) {
         Set<ConstraintViolation<SignUpRequest>> violations = validator.validate(request);
@@ -84,7 +86,7 @@ public class SignUpService {
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
-                .fullName(request.getFullName())
+                .fullName(request.getFirstName().concat(request.getLastName()))
                 .password(passwordEncoder.encode(request.getPassword()))
                 .gender(request.getGender() != null ? Gender.valueOf(request.getGender()) : null)
                 .dateOfBirth(request.getDateOfBirth())
@@ -96,8 +98,19 @@ public class SignUpService {
                 .verificationCode(verificationCode)
                 .build();
 
+//        AttachmentType fileType = getFileType(request.getProfilePic());
+//        String file_url = cloudinaryService.uploadFile(request.getProfilePic());
+//
+//        Attachment attachment = Attachment.builder()
+//                .user(user)
+//                .fileUrl(file_url)
+//                .fileType(fileType)
+//                .build();
+//
+//        user.setProfilePictureUrl(file_url);
+
         try {
-            mailService.sendVerificationCode(request.getEmail(), request.getFullName(), verificationCode);
+            mailService.sendVerificationCode(request.getEmail(), request.getFirstName().concat(request.getLastName()), verificationCode);
         } catch (Exception ex) {
             log.error("Failed to send email verification to {}: {}", request.getEmail(), ex.getMessage());
             throw new BusinessException("Failed to send verification email.", HttpStatus.BAD_REQUEST);
@@ -105,7 +118,7 @@ public class SignUpService {
 
         userRepo.save(user);
         log.info("User registered successfully: username = {}, email = {}", user.getUsername(), user.getEmail());
-        return ApiResponse.success("User successfully registered, please check email for account verification");
+        return ApiResponse.success(user.getUsername(), "Sign up process successfully completed, check your email for account verification");
     }
 
 
@@ -141,6 +154,18 @@ public class SignUpService {
         String token = jwtService.generateToken(request.getUsername());
 
         return ApiResponse.success(token, "Account successfully verified");
+    }
+
+    public AttachmentType getFileType(MultipartFile file) {
+        String contentType = file.getContentType();
+
+        List<String> imageTypes = Arrays.asList("image/png", "image/jpg", "image/jpeg", "image/gif");
+
+        if (imageTypes.contains(contentType)) {
+            return AttachmentType.IMAGE;
+        } else {
+            throw new IllegalArgumentException("Unsupported file format");
+        }
     }
 
 }
