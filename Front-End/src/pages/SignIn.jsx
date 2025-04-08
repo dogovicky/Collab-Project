@@ -86,7 +86,7 @@ const SignIn = () => {
 
   // Redirects the user to the forgot password page
   const handleForgotPassword = () => {
-    navigate("/forgot-password");
+    navigate("/reset-password");
   };
 
   return (

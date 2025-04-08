@@ -38,7 +38,10 @@ export const loginUser = async (credentials) => {
 
 export const requestResetCode = async (data) => {
   try {
-    const response = await api.post('/auth/forgot-password', data);
+    const response = await api.post('http://localhost:8080/auth/forgot-password', {
+      email: data.email,
+      resetPasswordUrl: data.resetPasswordUrl
+    });
     return response.data;
   } catch (error) {
     const errorMessage = error.response?.data?.message || error.message || "Request reset code failed";
@@ -53,11 +56,18 @@ export const requestResetCode = async (data) => {
 
 export const updatePassword = async (data) => {
   try {
-    const response = await api.post('/auth/reset-password', data);
-    return response.data;
+    const response = await api.post(`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/auth/reset-password`, {
+      token: data.token,
+      newPassword: data.newPassword
+    });
+    return {
+      success: true,
+      message: response.data.message || "Password reset successful",
+      data: response.data
+    };
   } catch (error) {
-    const errorMessage = error.response?.data?.message || error.message || "Update password failed";
-    console.error("Update password failed:", errorMessage);
+    const errorMessage = error.response?.data?.message || error.message || "Password reset failed";
+    console.error("Password reset failed:", errorMessage);
     throw {
       message: errorMessage,
       status: error.response?.status,

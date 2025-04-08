@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
-import { validateFileSize, validateFileType } from '../utils/fileValidation';
 
 export const useFormValidation = (initialState) => {
   const [formData, setFormData] = useState(initialState);
@@ -76,72 +75,48 @@ export const useFormValidation = (initialState) => {
     []
   );
 
-  const validateForm = useCallback(async (fieldsToValidate = Object.keys(formData)) => {
+  const validateForm = useCallback(() => {
     const newErrors = {};
     
-    for (const field of fieldsToValidate) {
-      const value = formData[field];
-      const fieldName = formatFieldName(field);
-
-      // Skip validation for optional fields if they're empty
-      if (!value && !['email', 'password'].includes(field)) {
-        continue;
+    // Check required fields
+    const requiredFields = ['email', 'password', 'firstName', 'lastName', 'username', 'dateOfBirth', 'gender', 'institution', 'fieldOfInterest'];
+    requiredFields.forEach(field => {
+      if (!formData[field] || formData[field].trim() === '') {
+        newErrors[field] = `${formatFieldName(field)} is required`;
       }
+    });
 
-      // Required field validation
-      if (['email', 'password'].includes(field) && !value?.toString().trim()) {
-        newErrors[field] = `${fieldName} is required`;
-        continue;
+    // Validate email
+    if (formData.email && !validateEmail(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
+    // Validate password
+    if (formData.password) {
+      const passwordValidation = validatePassword(formData.password);
+      if (!passwordValidation.isValid) {
+        newErrors.password = passwordValidation.message;
       }
+    }
 
-      switch(field) {
-        case 'email':
-          if (!validateEmail(value)) {
-            newErrors.email = `Please enter a valid email address`;
-          }
-          break;
-          
-        case 'password':
-          const passwordValidation = validatePassword(value);
-          if (!passwordValidation.isValid) {
-            newErrors.password = passwordValidation.message;
-          }
-          break;
+    // Username validation
+    if (formData.username && formData.username.length < 3) {
+      newErrors.username = 'Username must be at least 3 characters long';
+    }
 
-        case 'firstName':
-        case 'lastName':
-          if (!/^[a-zA-Z]+$/.test(value)) {
-            newErrors[field] = `${fieldName} should only contain letters`;
-          }
-          break;
-
-        case 'profilePicture':
-          if (value instanceof File) {
-            const sizeError = validateFileSize(value);
-            if (sizeError) {
-              newErrors.profilePicture = sizeError;
-              break;
-            }
-            
-            const typeError = validateFileType(value);
-            if (typeError) {
-              newErrors.profilePicture = typeError;
-              break;
-            }
-          } else if (value !== null) {
-            newErrors.profilePicture = `Please upload a valid image file`;
-          }
-          break;
-
-        case 'fieldsOfInterest':
-          if (!Array.isArray(value) || value.length === 0) {
-            newErrors.fieldsOfInterest = `Please select at least one field of interest.`;
-          }
-          break;
-
-        default:
-          break;
+    // Date of birth validation
+    if (formData.dateOfBirth) {
+      const date = new Date(formData.dateOfBirth);
+      const now = new Date();
+      const age = now.getFullYear() - date.getFullYear();
+      if (age < 13) {
+        newErrors.dateOfBirth = 'You must be at least 13 years old';
       }
+    }
+
+    // Gender validation
+    if (formData.gender === '--Choose Gender--') {
+      newErrors.gender = 'Please select a gender';
     }
 
     setErrors(newErrors);
@@ -170,9 +145,12 @@ export const useFormValidation = (initialState) => {
   useEffect(() => {
     const fieldsWithErrors = Object.keys(errors);
     if (fieldsWithErrors.length > 0) {
-      validateForm(fieldsWithErrors);
+      const currentErrors = validateForm();
+      if (JSON.stringify(currentErrors) !== JSON.stringify(errors)) {
+        setErrors(currentErrors);
+      }
     }
-  }, [formData, validateForm, errors]);
+  }, [formData]); // Only depend on formData changes
 
   return { 
     formData, 
