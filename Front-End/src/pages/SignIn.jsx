@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import { loginUser } from "../api/authA";
@@ -37,17 +37,35 @@ const SignIn = () => {
   };
 
   // Handles form submission
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault(); // Prevent default form submission behavior
+  //   const formErrors = validateForm(); // Validate the form inputs
+
+  //   if (Object.keys(formErrors).length > 0) {
+  //     setErrors(formErrors); // Set validation errors if any
+  //     toast.error("Please fill in all the required fields"); // Show error notification
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true); // Indicate that the form is being submitted
+
+  //   try {
+
+  //   } catch (error) {
+  //     if (error.response?.data?.errors) {
+  //       setErrors(error.response.data.errors); // Display specific errors from the API
+  //     }
+  //     toast.error(
+  //       error.response?.data?.message ||
+  //         error.message ||
+  //         "Login failed. Please try again."
+  //     ); // Show error notification
+  //   } finally {
+  //     setIsSubmitting(false); // Reset the submission state
+  //   }
+  // };
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
-    const formErrors = validateForm(); // Validate the form inputs
-
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors); // Set validation errors if any
-      toast.error("Please fill in all the required fields"); // Show error notification
-      return;
-    }
-
-    setIsSubmitting(true); // Indicate that the form is being submitted
+    e.preventDefault(e);
 
     try {
       const API_URL = "http://localhost:8080/auth/login"; // API endpoint for login
@@ -57,30 +75,14 @@ const SignIn = () => {
         },
       });
 
-      if (response.data.status !== 200) {
-        throw new Error("Login failed. Please try again."); // Handle unsuccessful login
+      if (response.status === 200) {
+        const { token, userDTO } = response.data.data; // Extract token and user data from response
+        localStorage.setItem("authToken", token); // Store the token in local storage
+        localStorage.setItem("username", userDTO.username); // Store the username in local storage
+        navigate("/home"); // Redirect to the home page
       }
-
-      if (!response) {
-        throw new Error("Authentication failed. Invalid credentials."); // Handle invalid credentials
-      }
-
-      console.log(response);
-      login(response.data.data); // Save the token using the login function from context
-      console.log(response.data.data);
-      toast.success("Logged in successfully!");
-      navigate("/home"); // Redirect to the home page
     } catch (error) {
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors); // Display specific errors from the API
-      }
-      toast.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Login failed. Please try again."
-      ); // Show error notification
-    } finally {
-      setIsSubmitting(false); // Reset the submission state
+      console.error("Login error: ", error.message);
     }
   };
 

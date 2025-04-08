@@ -25,6 +25,7 @@
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/EventDTO.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/LikeDTO.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/LoginRequest.java
+/home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/LoginResponseDTO.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/PostDTO.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/ProfileRequest.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/ProfileUpdateRequest.java

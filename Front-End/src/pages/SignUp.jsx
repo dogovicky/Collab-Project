@@ -9,12 +9,12 @@ const SignUp = () => {
   const API_URL = "http://localhost:8080/auth/signup";
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const {
     formData: signUpRequest,
     errors,
     handleChange: handleInputChange,
-    validateForm
+    validateForm,
   } = useFormValidation({
     firstName: "",
     lastName: "",
@@ -29,11 +29,11 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const formErrors = await validateForm();
     if (Object.keys(formErrors).length > 0) {
-      const firstErrorField = document.querySelector('.error-message');
-      firstErrorField?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const firstErrorField = document.querySelector(".error-message");
+      firstErrorField?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
@@ -51,15 +51,18 @@ const SignUp = () => {
 
     try {
       const response = await signUp(payload);
-      if (response.status === 200) {
-        localStorage.setItem("username", response.data);
-        navigate("/emailValidation");
+      if (response.data.status === 200) {
+        localStorage.setItem("username", response.data.data);
+        console.log(response.data);
       }
+      navigate("/emailValidation");
     } catch (error) {
       console.error("Sign up error: ", error);
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        submit: error.response?.data?.message || 'Failed to sign up. Please try again.'
+        submit:
+          error.response?.data?.message ||
+          "Failed to sign up. Please try again.",
       }));
     } finally {
       setIsSubmitting(false);
@@ -67,10 +70,12 @@ const SignUp = () => {
   };
 
   const renderError = (fieldName) => {
-    return errors[fieldName] && (
-      <div className="error-message" role="alert">
-        {errors[fieldName]}
-      </div>
+    return (
+      errors[fieldName] && (
+        <div className="error-message" role="alert">
+          {errors[fieldName]}
+        </div>
+      )
     );
   };
 
@@ -93,65 +98,73 @@ const SignUp = () => {
               <div className="col">
                 <input
                   type="text"
-                  className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    errors.firstName ? "is-invalid" : ""
+                  }`}
                   placeholder="First name"
                   aria-label="First name"
                   name="firstName"
                   value={signUpRequest.firstName}
                   onChange={handleInputChange}
                 />
-                {renderError('firstName')}
+                {renderError("firstName")}
               </div>
               <div className="col">
                 <input
                   type="text"
-                  className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    errors.lastName ? "is-invalid" : ""
+                  }`}
                   placeholder="Last name"
                   aria-label="Last name"
                   name="lastName"
                   value={signUpRequest.lastName}
                   onChange={handleInputChange}
                 />
-                {renderError('lastName')}
+                {renderError("lastName")}
               </div>
             </div>
             <div className="input-container">
               <div className="col-md-6">
                 <input
                   type="email"
-                  className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                  className={`form-control ${errors.email ? "is-invalid" : ""}`}
                   id="inputEmail4"
                   placeholder="Email e.g name@example.com"
                   name="email"
                   value={signUpRequest.email}
                   onChange={handleInputChange}
                 />
-                {renderError('email')}
+                {renderError("email")}
               </div>
               <div className="col-md-6">
                 <input
                   type="password"
-                  className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    errors.password ? "is-invalid" : ""
+                  }`}
                   id="inputPassword4"
                   placeholder="Strong password"
                   name="password"
                   value={signUpRequest.password}
                   onChange={handleInputChange}
                 />
-                {renderError('password')}
+                {renderError("password")}
               </div>
             </div>
             <div className="col-12">
               <input
                 type="text"
-                className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                className={`form-control ${
+                  errors.username ? "is-invalid" : ""
+                }`}
                 id="inputAddress"
                 placeholder="@username"
                 name="username"
                 value={signUpRequest.username}
                 onChange={handleInputChange}
               />
-              {renderError('username')}
+              {renderError("username")}
             </div>
             <div className="details">
               <div className="col-md-6">
@@ -160,13 +173,15 @@ const SignUp = () => {
                 </label>
                 <input
                   type="date"
-                  className={`form-control ${errors.dateOfBirth ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    errors.dateOfBirth ? "is-invalid" : ""
+                  }`}
                   id="inputCity"
                   name="dateOfBirth"
                   value={signUpRequest.dateOfBirth}
                   onChange={handleInputChange}
                 />
-                {renderError('dateOfBirth')}
+                {renderError("dateOfBirth")}
               </div>
               <div className="col-md-4">
                 <label for="inputState" className="form-label">
@@ -174,7 +189,7 @@ const SignUp = () => {
                 </label>
                 <select
                   id="inputState"
-                  className={`form-select ${errors.gender ? 'is-invalid' : ''}`}
+                  className={`form-select ${errors.gender ? "is-invalid" : ""}`}
                   name="gender"
                   value={signUpRequest.gender}
                   onChange={handleInputChange}
@@ -183,7 +198,7 @@ const SignUp = () => {
                   <option>Male</option>
                   <option>Female</option>
                 </select>
-                {renderError('gender')}
+                {renderError("gender")}
               </div>
               <div className="col-md-2">
                 <label for="inputZip" className="form-label">
@@ -191,13 +206,15 @@ const SignUp = () => {
                 </label>
                 <input
                   type="text"
-                  className={`form-control ${errors.institution ? 'is-invalid' : ''}`}
+                  className={`form-control ${
+                    errors.institution ? "is-invalid" : ""
+                  }`}
                   id="inputZip"
                   name="institution"
                   value={signUpRequest.institution}
                   onChange={handleInputChange}
                 />
-                {renderError('institution')}
+                {renderError("institution")}
               </div>
             </div>
             <div className="col-12">
@@ -206,22 +223,24 @@ const SignUp = () => {
               </label>
               <input
                 type="text"
-                className={`form-control ${errors.fieldOfInterest ? 'is-invalid' : ''}`}
+                className={`form-control ${
+                  errors.fieldOfInterest ? "is-invalid" : ""
+                }`}
                 id="inputAddress2"
                 placeholder="Example; Cyber Security, Medicine, Aviation etc.."
                 name="fieldOfInterest"
                 value={signUpRequest.fieldOfInterest}
                 onChange={handleInputChange}
               />
-              {renderError('fieldOfInterest')}
+              {renderError("fieldOfInterest")}
             </div>
             <div className="col-12">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn btn-primary"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Signing Up...' : 'Sign Up'}
+                {isSubmitting ? "Signing Up..." : "Sign Up"}
               </button>
             </div>
           </form>

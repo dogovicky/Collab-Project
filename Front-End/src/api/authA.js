@@ -18,8 +18,8 @@ api.interceptors.request.use((config) => {
 export const loginUser = async (credentials) => {
   try {
     const response = await api.post('http://localhost:8080/auth/login', credentials);
-    if(response.status == 200) {
-      console.log(response);
+    if(response.data.status == 200) {
+      console.log(response.data);
       return response.data;
     } else {
       throw new Error("Login failed");
@@ -42,7 +42,7 @@ export const requestResetCode = async (data) => {
       email: data.email,
       resetPasswordUrl: data.resetPasswordUrl
     });
-    return response.data;
+    return response.data.data;
   } catch (error) {
     const errorMessage = error.response?.data?.message || error.message || "Request reset code failed";
     console.error("Request reset code failed:", errorMessage);
@@ -78,13 +78,14 @@ export const updatePassword = async (data) => {
 
 export const createPost = async (formData) => {
   try {
-    const response = await api.post('/posts', formData, {
+    const response = await api.post('http://localhost:8080/api/create-post', formData, {
       headers: {
         Accept: "application/json",
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data;
+    console.log(response.data);
+    return response.data.data; // Assuming response.data.data contains the created post
   } catch (error) {
     const errorMessage = error.response?.data?.message || error.message || "Failed to create post";
     console.error("Failed to create post:", errorMessage);
@@ -128,8 +129,10 @@ export const verifyCode = async (email, code) => {
 
 export const fetchUserData = async () => {
   try {
-    const response = await api.get('/user/profile');
-    return response.data; // Assuming response.data contains user data
+    console.log(localStorage.getItem('username'));
+    const response = await api.get('http://localhost:8080/profile?username=' + localStorage.getItem('username'));
+    console.log(response.data)
+    return response.data.data; // Assuming response.data contains user data
   } catch (error) {
     const errorMessage = error.response?.data?.message || error.message || "Failed to fetch user data";
     console.error("Failed to fetch user data:", errorMessage);

@@ -87,6 +87,7 @@ com/capricon/Collab_Project/dto/ProfileRequest$ProfileRequestBuilder.class
 com/capricon/Collab_Project/controller/RepostController.class
 com/capricon/Collab_Project/filter/JwtFilter.class
 com/capricon/Collab_Project/service/PasswordResetService.class
+com/capricon/Collab_Project/dto/LoginResponseDTO.class
 com/capricon/Collab_Project/model/Post$PostBuilder.class
 com/capricon/Collab_Project/exception/UserException.class
 com/capricon/Collab_Project/model/Message.class

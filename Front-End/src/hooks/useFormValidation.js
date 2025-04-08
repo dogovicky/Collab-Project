@@ -44,14 +44,14 @@ export const useFormValidation = (initialState) => {
     };
   };
 
-  const checkEmailExists = async (email) => {
-    try {
-      const response = await axios.post('/api/check-email', { email });
-      return response.data.exists;
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'Error checking email');
-    }
-  };
+  // const checkEmailExists = async (email) => {
+  //   try {
+  //     const response = await axios.post('/api/check-email', { email });
+  //     return response.data.exists;
+  //   } catch (error) {
+  //     throw new Error(error.response?.data?.message || 'Error checking email');
+  //   }
+  // };
 
   const debouncedEmailCheck = useCallback(
     debounce(async (email) => {

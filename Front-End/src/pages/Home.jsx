@@ -6,10 +6,12 @@ import SearchBar from "../components/SearchBar";
 import Feeds from "../components/Feeds";
 import { toast } from "react-toastify"; // Add this import
 import axios from "axios";
+import CreatePost from "../components/CreatePost";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
-  const username = localStorage.getItem("username") || "User";
+  const [loading, setLoading] = useState(false);
+  const username = localStorage.getItem("username");
 
   const handleSearch = (query, searchType) => {
     console.log(`Searching for ${query} in ${searchType}`);
@@ -20,13 +22,14 @@ const Home = () => {
     try {
       const API_URL = `http://localhost:8080/?username=${username}`;
       console.log(username);
-      
+
       const response = await axios.get(API_URL, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
       });
+      setLoading(true);
       if (response.data.status != 200) {
         throw new Error("Failed to fetch posts");
       }
@@ -56,9 +59,14 @@ const Home = () => {
         <SideBar />
         <main className="home-main">
           <h2>Welcome, {username}!</h2>
-          {posts.length > 0 ? <Feeds posts={posts} /> : <p>Loading posts...</p>}
+          {posts.length > 0 ? (
+            <Feeds posts={posts} />
+          ) : (
+            <p>No events match your interests.</p>
+          )}
         </main>
       </div>
+      <CreatePost />
     </div>
   );
 };

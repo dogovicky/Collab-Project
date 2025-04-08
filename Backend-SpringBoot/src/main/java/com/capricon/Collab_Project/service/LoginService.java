@@ -2,6 +2,8 @@ package com.capricon.Collab_Project.service;
 
 import com.capricon.Collab_Project.dto.ApiResponse;
 import com.capricon.Collab_Project.dto.LoginRequest;
+import com.capricon.Collab_Project.dto.LoginResponseDTO;
+import com.capricon.Collab_Project.dto.UserDTO;
 import com.capricon.Collab_Project.exception.UserException;
 import com.capricon.Collab_Project.model.User;
 import com.capricon.Collab_Project.repository.UserRepo;
@@ -28,7 +30,7 @@ public class LoginService {
     private final AuthenticationManager authManager;
     private final Executor executor;
 
-    public CompletableFuture<ApiResponse<String>> loginUser(LoginRequest request) {
+    public CompletableFuture<ApiResponse<LoginResponseDTO>> loginUser(LoginRequest request) {
         return CompletableFuture.supplyAsync(() -> {
             User user = userRepo.findByUsername(request.getUsername())
                     .orElseThrow(() -> new UserException("User does not exist", HttpStatus.NOT_FOUND));
@@ -43,7 +45,8 @@ public class LoginService {
                 );
 
                 String token = jwtService.generateToken(request.getUsername());
-                return ApiResponse.success(token, "Login successful");
+                LoginResponseDTO response = new LoginResponseDTO(token, buildUserDTO(user));
+                return ApiResponse.success(response, "Login successful");
 
             } catch (BadCredentialsException e) {
                 throw new UserException("Wrong password. Please try again.", HttpStatus.UNAUTHORIZED);
@@ -58,6 +61,14 @@ public class LoginService {
                 return ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred");
             }
         });
+    }
+
+    private UserDTO buildUserDTO(User user) {
+        return UserDTO.builder()
+                .username(user.getUsername())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .build();
     }
 
 }

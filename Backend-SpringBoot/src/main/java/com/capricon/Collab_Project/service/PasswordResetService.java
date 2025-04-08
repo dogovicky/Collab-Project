@@ -73,7 +73,7 @@ public class PasswordResetService {
             //Send reset email
             String resetLink = "http://localhost:5173/reset-password?token=" + token;
             mailService.sendResetPasswordLink(email, resetLink, String.valueOf(expiry));
-            return ApiResponse.success("Password reset email sent.");
+            return ApiResponse.success(token, "Reset link sent to your email");
 
         } catch (Exception ex) {
             log.error("Error processing password reset process: {}", ex.getMessage());

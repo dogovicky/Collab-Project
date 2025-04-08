@@ -47,7 +47,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public CompletableFuture<ResponseEntity<ApiResponse<String>>> login(@Valid @RequestBody LoginRequest request) {
+    public CompletableFuture<ResponseEntity<ApiResponse<LoginResponseDTO>>> login(@Valid @RequestBody LoginRequest request) {
         return loginService.loginUser(request)
                 .thenApply(ResponseEntity::ok)
                 .exceptionally(this::handleAuthControllerException);
@@ -60,6 +60,7 @@ public class AuthController {
                 .exceptionally(this::handleAuthControllerException);
     }
 
+    @PostMapping("/reset-password")
     public CompletableFuture<ResponseEntity<ApiResponse<String>>> resetPassword(@RequestBody Map<String, String> request) {
         return resetService.savePassword(request.get("token"), request.get("newPassword"))
                 .thenApply(ResponseEntity::ok)

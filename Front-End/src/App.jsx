@@ -1,18 +1,18 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import EmailValidation from './pages/EmailValidation';
-import Home from './pages/Home';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
-import ResetPassword from './pages/ResetPassword';
-import Welcome from './pages/Welcome';
-import Messages from './pages/Messages';
-import Connections from './pages/Connections';
-import ProfilePage from './pages/ProfilePage';
-import NotificationPage from './pages/NotificationPage';
-import ForgotPassword from './pages/ForgotPassword';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import EmailValidation from "./pages/EmailValidation";
+import Home from "./pages/Home";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import ResetPassword from "./pages/ResetPassword";
+import Welcome from "./pages/Welcome";
+import Messages from "./pages/Messages";
+import Connections from "./pages/Connections";
+import ProfilePage from "./pages/ProfilePage";
+import NotificationPage from "./pages/NotificationPage";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   return (

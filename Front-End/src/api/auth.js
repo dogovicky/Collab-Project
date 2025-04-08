@@ -15,15 +15,17 @@ export const signUp = async (formData) => {
     });
 
     const response = await axios.post("http://localhost:8080/auth/signup", formDataToSend, {
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       validateStatus: status => status < 500
     });
 
-    if (response.status !== 200) {
+    if (response.data.status !== 200) {
       throw new Error(response.data.message || 'Registration failed');
     }
-
-    return response;
+    console.log(response.data);
+    return response.data;
   } catch (error) {
     if (error.response) {
       throw new Error(error.response.data.message || 'Server error occurred');

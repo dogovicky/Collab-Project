@@ -21,7 +21,7 @@ const ProfileHeader = ({ user }) => {
     <div className="profile-header">
       <div className="cover-photo"></div>
       <div className="profile-info">
-        <img src={user?.avatar} alt="User Avatar" className="profile-avatar" />
+        {/* <img src={user?.avatar} alt="User Avatar" className="profile-avatar" /> */}
         <div className="profile-details">
           <h2 className="profile-name">{user?.name}</h2>
           <p className="profile-username">@{user?.username}</p>
