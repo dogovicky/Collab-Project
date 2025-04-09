@@ -2,7 +2,6 @@ package com.capricon.Collab_Project.controller;
 
 import com.capricon.Collab_Project.dto.ApiResponse;
 import com.capricon.Collab_Project.dto.CommentDTO;
-import com.capricon.Collab_Project.model.Comment;
 import com.capricon.Collab_Project.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 @Slf4j
