@@ -45,10 +45,8 @@ public class MessageController {
         List<MessageDTO> messages = messageService.getChat(sender, recipient);
 
         // You can customize this message depending on the outcome
-        ApiResponse<List<MessageDTO>> response = new ApiResponse<>(
-                "success",
-                "Messages fetched successfully",
-                messages
+        ApiResponse<List<MessageDTO>> response =  ApiResponse.success(
+                messages, "Successfully fetched messages"
         );
 
         return ResponseEntity.ok(response);
