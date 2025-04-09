@@ -63,7 +63,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Allow your deployed frontend domain + localhost during development
-        configuration.addAllowedOriginPattern("http://localhost:[*]");
+       // configuration.addAllowedOriginPattern("http://localhost:[*]");
         configuration.addAllowedOriginPattern("https://*.vercel.app");
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
