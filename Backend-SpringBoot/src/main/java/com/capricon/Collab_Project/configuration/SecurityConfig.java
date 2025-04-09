@@ -63,7 +63,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Allow your deployed frontend domain + localhost during development
-        configuration.addAllowedOriginPattern("http://localhost:5173");
+        configuration.addAllowedOriginPattern("http://localhost:[*]");
         configuration.addAllowedOriginPattern("https://*.vercel.app");
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -72,7 +72,7 @@ public class SecurityConfig {
                 "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"
         ));
         configuration.setExposedHeaders(Arrays.asList(
-                "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"
+                "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials", "Vary"
         ));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
