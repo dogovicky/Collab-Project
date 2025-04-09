@@ -13,6 +13,7 @@
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/controller/ConnectionController.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/controller/HomeController.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/controller/LikeController.java
+/home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/controller/MessageController.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/controller/PostController.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/controller/RepostController.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/controller/UserController.java
@@ -26,6 +27,7 @@
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/LikeDTO.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/LoginRequest.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/LoginResponseDTO.java
+/home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/MessageDTO.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/PostDTO.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/ProfileRequest.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/dto/ProfileUpdateRequest.java
@@ -64,6 +66,7 @@
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/repository/CommunityRepo.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/repository/ConnectionRepo.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/repository/LikeRepo.java
+/home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/repository/MessageRepo.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/repository/PasswordResetTokenRepo.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/repository/PostRepo.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/repository/RepostRepo.java
@@ -76,6 +79,7 @@
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/service/LikeService.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/service/LoginService.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/service/MailService.java
+/home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/service/MessageService.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/service/MyUserDetailsService.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/service/PasswordResetService.java
 /home/vicky/Java Web/Collab-Project/Backend-SpringBoot/src/main/java/com/capricon/Collab_Project/service/PostService.java

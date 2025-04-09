@@ -17,6 +17,7 @@ com/capricon/Collab_Project/dto/ConnectionRequest.class
 com/capricon/Collab_Project/configuration/CloudinaryConfig.class
 com/capricon/Collab_Project/model/Community.class
 com/capricon/Collab_Project/dto/ConnectionDTO$ConnectionDTOBuilder.class
+com/capricon/Collab_Project/controller/MessageController.class
 com/capricon/Collab_Project/model/enums/Gender.class
 com/capricon/Collab_Project/dto/ProfileRequest.class
 com/capricon/Collab_Project/dto/ValidationRequest.class
@@ -44,6 +45,7 @@ com/capricon/Collab_Project/model/User.class
 com/capricon/Collab_Project/model/enums/Status.class
 com/capricon/Collab_Project/controller/LikeController.class
 com/capricon/Collab_Project/controller/PostController.class
+com/capricon/Collab_Project/dto/MessageDTO$MessageDTOBuilder.class
 com/capricon/Collab_Project/service/ConnectionService.class
 com/capricon/Collab_Project/dto/CommentDTO.class
 com/capricon/Collab_Project/dto/SignUpRequest$SignUpRequestBuilder.class
@@ -93,6 +95,7 @@ com/capricon/Collab_Project/exception/UserException.class
 com/capricon/Collab_Project/model/Message.class
 com/capricon/Collab_Project/model/Post.class
 com/capricon/Collab_Project/service/HomeService.class
+com/capricon/Collab_Project/repository/MessageRepo.class
 com/capricon/Collab_Project/dto/UserProfileDTO$UserProfileDTOBuilder.class
 com/capricon/Collab_Project/dto/LikeDTO.class
 com/capricon/Collab_Project/dto/ApiResponse.class
@@ -102,4 +105,6 @@ com/capricon/Collab_Project/model/Attachment.class
 com/capricon/Collab_Project/repository/AttachmentRepo.class
 com/capricon/Collab_Project/configuration/AsyncConfig.class
 com/capricon/Collab_Project/configuration/WebMvcConfig.class
+com/capricon/Collab_Project/service/MessageService.class
 com/capricon/Collab_Project/service/CloudinaryService.class
+com/capricon/Collab_Project/dto/MessageDTO.class
