@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.sql.Timestamp;
@@ -33,6 +34,7 @@ public class Message {
     @Column(name = "message_text")
     private String messageText;
 
+    @CreationTimestamp
     @Column(name = "sent_at")
     private Timestamp sentAt;
 
