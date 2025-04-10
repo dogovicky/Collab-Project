@@ -45,7 +45,7 @@ public class PostController {
 
     @PostMapping(value = "/create-post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<PostDTO>> savePost(@ModelAttribute @Valid EventDTO eventDTO) {
-        log.info("Creating post event");
+        log.info("Creating post event for user: {}", eventDTO.getUsername());
         try {
             ApiResponse<PostDTO> response = postService.createEvent(eventDTO);
             if (response.isSuccess()) {
