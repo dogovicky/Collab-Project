@@ -29,7 +29,7 @@ defmodule BackendElixirWeb.NotificationChannel do
     messages = [
       %{id: 1, content: "Hello from Phoenix!"},
       %{id: 2, content: "Another message"},
-      %{id: 3, content: "Chapo nne"}
+      %{id: 3, content: "Chapo nne na dengu"}
     ]
 
     {:reply, {:ok, %{messages: messages}}, socket}
