@@ -193,7 +193,7 @@ defmodule BackendElixir.Messaging.Consumer do
 
   # SSL options
   defp load_ssl_options(rabbitmq_host) do
-    system_cert_path = "/home/elon/cacert.pem"
+    system_cert_path = "/home/vicky/Java Web/Collab-Project/backend_elixir/cacert.pem"
 
     if File.exists?(system_cert_path) do
       [

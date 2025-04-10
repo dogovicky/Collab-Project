@@ -11,7 +11,7 @@ defmodule BackendElixir.RabbitMQ do
   @rabbitmq_host URI.parse(@rabbitmq_url).host ||
                    raise("ERROR: Failed to extract RabbitMQ host from RABBITMQ_URL")
 
-  @cacertfile "/home/elon/cacert.pem"
+  @cacertfile "/home/vicky/Java Web/Collab-Project/backend_elixir/cacert.pem"
 
   # Starts the GenServer process
   def start_link(_) do
@@ -78,7 +78,7 @@ defmodule BackendElixir.RabbitMQ do
 
     [
       verify: :verify_peer,
-      fail_if_no_peer_cert: false,
+      fail_if_no_peer_cert: true,
       depth: 5,
       cacertfile: @cacertfile,
       server_name_indication: to_charlist(host),

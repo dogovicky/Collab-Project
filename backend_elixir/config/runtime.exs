@@ -20,7 +20,7 @@ Application.put_env(:backend_elixir, :rabbitmq_url, rabbitmq_url)
 
 # RabbitMQ SSL Configuration
 rabbitmq_host = System.get_env("RABBITMQ_HOST") || raise "ERROR: RABBITMQ_HOST is not set!"
-cacertfile_path = "/home/elon/cacert.pem"
+cacertfile_path = "/home/vicky/Java Web/Collab-Project/backend_elixir/cacert.pem"
 
 unless File.exists?(cacertfile_path) do
   Logger.error(
